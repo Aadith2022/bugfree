@@ -1,0 +1,52 @@
+{% extends "debugger/layout.html" %}
+
+{% block body %}
+
+    <div class = "message_page_container">
+
+        <h2 class = "all_messages_h2">View your notifications</h2><br><br>
+
+        <div class = "view_messages">
+
+            <h3 class = "manage_users_header">Search your notifications</h3><br><br>
+                
+            <table class = "message_table">
+
+                <thead>
+
+                    <tr class = "message_table_header">
+                        <td>Title:</td>
+                        <td>Description:</td>
+                        <td>Timestamp:</td>
+                    </tr>
+
+                </thead>
+                
+                <tbody>
+
+                    {% for message in user_messages %}
+
+                        <tr class = "message_table_data">
+                            <td class = "mtable_title"> {{message.title}} </td>
+                            <td class = "mtable_description"> {{message.message}} </td>
+                            <td class = "mtable time"> {{message.timestamp}} </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+
+        <script>
+
+            $(document).ready(function () {
+                $('.message_table').DataTable();
+            });
+
+        </script>
+
+    </div>
+
+{% endblock %}

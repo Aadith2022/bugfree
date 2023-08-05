@@ -1,0 +1,38 @@
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("", views.index, name="index"),
+    path("logout", views.logout_view, name = "logout"),
+    path("user/<int:institution_id>/<int:user_id>", views.user, name = "user"),
+    path("submitter/<int:institution_id>/<int:user_id>", views.submitter, name = "submitter"),
+    path("submitter_leave/<int:institution_id>/<int:user_id>", views.submitter_leave, name = "submitter_leave"),
+    path("submitter_tickets/<int:institution_id>/<int:user_id>", views.submitter_view_ticket, name = "submitter_tickets"),
+    path("submitter_notifications/<int:institution_id>/<int:user_id>", views.submitter_notifications, name = "submitter_notifications"),
+    path("submitter_ticket_details/<int:institution_id>/<int:user_id>/<int:ticket_id>", views.submitter_ticket_details, name = "submitter_ticket_details"),
+    path("administrator/<int:institution_id>/<int:admin_id>", views.admin, name = "administrator"),
+    path("administrator_leave/<int:institution_id>/<int:admin_id>", views.admin_leave, name = "admin_leave"),
+    path("administrator_pwd/<int:institution_id>/<int:admin_id>", views.admin_pwd, name = "admin_pwd"),
+    path("administrator_pending/<int:institution_id>/<int:admin_id>", views.admin_pending, name = "admin_pending"),
+    path("administrator_users/<int:institution_id>/<int:admin_id>", views.admin_manage_users, name = "admin_manage_users"),
+    path("administrator_project_users/<int:institution_id>/<int:admin_id>/<int:project_id>", views.admin_manage_project_users, name = "admin_manage_project_users"),
+    path("administrator_projects/<int:institution_id>/<int:admin_id>", views.admin_manage_projects, name = "admin_manage_projects"),
+    path("administrator_tickets/<int:institution_id>/<int:admin_id>", views.admin_manage_tickets, name = "admin_manage_tickets"),
+    path("administrator_ticket_details/<int:institution_id>/<int:admin_id>/<int:ticket_id>", views.admin_ticket_details, name = "admin_ticket_details"),
+    path("administrator_project_details/<int:institution_id>/<int:admin_id>/<int:project_id>", views.admin_project_details, name = "admin_project_details"),
+    path("notifications/<int:institution_id>/<int:admin_id>", views.notifications, name = "notifications"),
+    path("developer/<int:institution_id>/<int:user_id>", views.developer, name = "developer"),
+    path("developer_leave/<int:institution_id>/<int:user_id>", views.developer_leave, name = "developer_leave"),
+    path("developer_tickets/<int:institution_id>/<int:user_id>", views.developer_view_tickets, name = "developer_tickets"),
+    path("developer_ticket_details/<int:institution_id>/<int:user_id>/<int:ticket_id>", views.developer_ticket_details, name = "developer_ticket_details"),
+    path("developer_notifications/<int:institution_id>/<int:user_id>", views.developer_notifications, name = "developer_notifications"),
+    path("pm/<int:institution_id>/<int:user_id>", views.pm, name = "pm"),
+    path("pm_leave/<int:institution_id>/<int:user_id>", views.pm_leave, name = "pm_leave"),
+    path('pm_tickets/<int:institution_id>/<int:user_id>', views.pm_view_tickets, name = "pm_tickets"),
+    path('pm_ticket_details/<int:institution_id>/<int:user_id>/<int:ticket_id>', views.pm_ticket_details, name = "pm_ticket_details"),
+    path("pm_notifications/<int:institution_id>/<int:user_id>", views.pm_notifications, name = "pm_notifications"),
+    path("pm_manage_projects/<int:institution_id>/<int:user_id>", views.pm_manage_projects, name = "pm_manage_projects"),
+    path("pm_project_users/<int:institution_id>/<int:user_id>/<int:project_id>", views.pm_manage_project_users, name = "pm_manage_project_users"),
+    path("pm_project_details/<int:institution_id>/<int:user_id>/<int:project_id>", views.pm_project_details, name = "pm_project_details"),
+]

@@ -1,0 +1,130 @@
+{% extends "debugger/developer_layout.html" %}
+
+{% block body %}
+
+    <div class = "developer_tickets_container">
+
+        <div class = "developer_view_tickets">
+
+            {% if all_bugs|length == 0 %}
+                <div class = "developer_no_tickets">
+                    <h2>There are no Bugs in your projects, wait until a submitter creates one to view it here</h2>
+                </div>
+            {% else %}
+                <div class = "developer_ticket_page_container">
+
+                    <h3 class = "manage_users_header">Search/Update Tickets</h3><br><br>
+
+                    <table class = "ticket_list">
+
+                        <thead>
+
+                            <tr class = "ticket_list_header">
+                                <td>Title</td>
+                                <td>Project</td>
+                                <td>Ticket Priority</td>
+                                <td>Ticket Status</td>
+                                <td>Ticket Type</td>
+                                <td>Created</td>
+                                <td>Update Status</td>
+                                <td>More Details</td>
+                                <!-- need to add a column for a details hyperlink -->
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for bug in all_bugs %}
+                                <tr class = "ticket_list_data">
+                                    <td>{{ bug.title }}</td>
+
+                                    {% for project in bug.project_bugs.all %}
+                                        <td>{{ project.title }}</td>
+                                    {% endfor %}
+
+                                    <td>{{ bug.priority }}</td>
+                                    <td>{{ bug.status }}</td>
+                                    <td>{{ bug.type }}</td>
+                                    <td>{{ bug.created }}</td>
+                                    <td class = "update_bug"><button class = "update_bug_button" onclick = "showupdate('{{bug.title}}', '{{bug.content}}', '{{bug.type}}', '{{bug.priority}}', '{{bug.id}}')">Update</button></td>
+                                    <td class = "detail_table_element"><a href = "{% url 'developer_ticket_details' institution_id=institution.id user_id=user.id ticket_id=bug.id %}">More Details</a></td>
+                                </tr>
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <script>
+
+                    $(document).ready(function () {
+                        $('.ticket_list').DataTable();
+                    });
+
+                </script>
+
+            {% endif %}
+
+        </div>
+
+        
+        <div class = "developer_edit_ticket" style = "display:none">
+
+            <h3 id = "dev_form_header" class = "manage_users_header">Update Ticket Information</h3><br>
+
+            <form action = "{% url 'developer_tickets' institution_id=institution.id user_id=user.id %}" method = "POST">
+                {% csrf_token %}
+                <h3>Ticket Title:</h3><br>
+                <h5 class = "hidden_ticket_title"></h5>
+                <br><br>
+                <h3>Ticket Description:</h3><br>
+                <h5 class = "hidden_ticket_description"></h5><br><br>
+                <h3>Ticket Type:</h3><br>
+                <h5 class = "hidden_ticket_type"></h5><br><br>
+                <h3>Ticket Priority:</h3><br>
+                <h5 class = "hidden_ticket_priority"></h5><br><br>
+
+                <label for = "status_update">Update Ticket Priority:</label><br><br>
+                <select name = "status_update" size = "5">
+                    <option value = "New" >New</option>
+                    <option value = "Open" >Open</option>
+                    <option value = "In Progress">In Progress</option>
+                    <option value = "Resolved">Resolved</option>
+                    <option value = "Additional Info Required">Additional Info Required</option>
+                </select><br><br>
+
+                <input type = "hidden" name = "hidden_ticket_id" class = "hidden_ticket_id">
+
+                <button type = "submit" class = "pruser_btn" name = "update_ticket_status">Update Status</button>
+                <button class = "pruser_btn" name = "update_ticket_cancel" onclick = "cancelupdate()">Cancel</button>
+            </form>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        function showupdate(title, content, type, priority, id) {
+            document.querySelector('.developer_view_tickets').style.display = 'none';
+            document.querySelector('.developer_edit_ticket').style.display = 'block';
+
+            document.querySelector('.hidden_ticket_title').innerHTML = `${title}`;
+            document.querySelector('.hidden_ticket_description').innerHTML = `${content}`;
+            document.querySelector('.hidden_ticket_type').innerHTML = `${type}`;
+            document.querySelector('.hidden_ticket_priority').innerHTML = `${priority}`;
+
+            document.querySelector('.hidden_ticket_id').value = `${id}`;
+        }
+
+        function cancelupdate() {
+            document.querySelector('.developer_edit_ticket').style.display = 'none';
+            document.querySelector('.developer_view_tickets').style.display = 'block';
+        }
+
+    </script>
+
+{% endblock %}

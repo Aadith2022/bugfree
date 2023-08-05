@@ -1,0 +1,19 @@
+{% extends "debugger/pm_layout.html" %}
+
+{% block body %}
+
+    <div class = "leave_container">
+
+        <div class = "leave_alert">
+            <h3>Alert</h3>
+            <p>Are you sure you want to leave this Institution? If you want to join back, you will need to register again and be accepted by an administrator</p><br>
+            <form action = "{% url 'pm_leave' institution_id=institution.id user_id=user.id %}" method = "POST">
+                {% csrf_token %}
+                <button class = "pruser_btn" type = "submit" name = "leave_confirm">Yes</button>
+                <button class = "pruser_btn" type = "submit" name = "leave_deny">No</button>
+            </form>
+        </div>
+
+    </div>
+
+{% endblock %}

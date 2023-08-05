@@ -1,0 +1,331 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> BugFree </title>
+        <link rel="stylesheet" href="{% static 'debugger/newstyles.css' %}">
+        <link href = "//cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" rel = "stylesheet">
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+        <script src = "//cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+
+    </head>
+    <body>
+        <div class = "admin_dashboard_wrapper">
+            <ul>
+                <li>Signed in as: Admin</li>
+                <li><a href = "{% url 'administrator' institution_id=institution.id admin_id=admin.id %}">Dashboard Home</a></li>
+                <li><a href = "{% url 'admin_manage_users' institution_id=institution.id admin_id=admin.id %}">Manage Users</a></li>
+                <li><a href = "{% url 'admin_manage_projects' institution_id=institution.id admin_id=admin.id %}">View Projects</a></li>
+                <li><a href = "{% url 'admin_manage_tickets' institution_id=institution.id admin_id=admin.id %}">View Tickets</a></li>
+
+                <!-- new -->
+                {% if all_pending %}
+                    <li><a href = "{% url 'admin_pending' institution_id=institution.id admin_id=admin.id %}">Manage Pending Users</a></li>
+                {% endif %}
+                
+            </ul>
+        </div>
+        
+        <div class = "detail_universal_container">
+            <div class = "upper_wrapper">
+                <ul>
+                    {% if isUnread %}
+                        <li><a href = "{% url 'notifications' institution_id=institution.id admin_id=admin.id %}"><ion-icon name="notifications-circle-outline" class = "ion"></ion-icon>Notifications</a></li>
+                    {% else %}
+                        <li><a href = "{% url 'notifications' institution_id=institution.id admin_id=admin.id %}"><ion-icon name="notifications-outline" class = "ion"></ion-icon>Notifications</a></li>
+                    {% endif %}
+
+                        <li><a href = "{% url 'logout' %}">Logout</a></li>
+                        <li><a href = "{% url 'admin_leave' institution_id=institution.id admin_id=admin.id %}">Leave Institution</a></li>
+
+                        <li><a href = "{% url 'admin_pwd' institution_id=institution.id admin_id=admin.id %}">Change Admin Password</a></li>
+
+                </ul>
+            </div>
+            <div class = "body_container">
+
+                <!-- <div class = "admin_project_user_container"> -->
+
+                    <div class = "admin_manage_holder">
+            
+                        <div class = "admin_manage_pruser">
+
+                            <h3 class = "manage_users_header">Manage/Remove Project Users</h3><br><br>
+            
+                            <table class = "admin_pruser_table">
+            
+                                <thead>
+            
+                                    <tr class = "admin_pruser_header">
+                                        <td>Username:</td>
+                                        <td>Role:</td>
+                                        <td id = "project_edit_header">Edit/Remove:</td>
+                                    </tr>
+            
+                                </thead>
+            
+                                <tbody>
+            
+                                    {% for user in these_users %}
+            
+                                        <tr id = "{{user.id}}_row" class = "admin_pruser_data">
+                                            <td>{{user.username}}</td>
+            
+                                            {% if user in all_admin %}
+                                                <td>Admin</td>
+                                            {% elif user in all_devs %}
+                                                <td>Developer</td>
+                                            {% elif user in all_pm %}
+                                                <td>Project Manager</td>
+                                            {% elif user in all_submitters %}
+                                                <td>Submitter</td>
+                                            {% else %}
+                                                <td>N/A</td>
+                                            {% endif %}
+            
+                                            <td class = "pruser_table_buttons"><button class = "edit_pruser" onclick = "show_edit('{{user.id}}')" >Edit Role</button><button class = "remove_pruser" onclick = "confirmation('{{user.id}}')">Remove User</button></td>
+            
+                                        </tr>
+            
+                                    {% endfor %}
+            
+                                </tbody>
+            
+                            </table>
+            
+                            <script>
+            
+                                $(document).ready(function () {
+                                    $('.admin_pruser_table').DataTable();
+                                });
+                
+                            </script>
+            
+                        </div>
+            
+                        <div class = "admin_remove_pruser" style = "display:none">
+                            <h2>Are you sure you want to remove this user?</h2>
+                            <form action = "{% url 'admin_manage_project_users' institution_id=institution.id admin_id=admin.id project_id=this_project.id %}" method = "POST">
+                                {% csrf_token %}
+                                <input type = "hidden" id = "hidden_remove_input" name = "hidden_remove_input">
+                                <br>
+                                <button type = "submit" class = "remove_btn" name = "pruser_remove">Yes</button>
+                                <button onclick = "keep()" class = "remove_btn" name = "pruser_keep">No</button>
+                            </form>
+                        </div>
+            
+                        <div class = "admin_edit_pruser" style = "display:none">
+                            <h2>Select a New Role for this User:</h2>
+                            <form action = "{% url 'admin_manage_project_users' institution_id=institution.id admin_id=admin.id project_id=this_project.id %}" method = "POST">
+                                {% csrf_token %}
+                                <input type = "hidden" id = "hidden_pruser_input" name = "hidden_pruser_input">
+                                <br>
+                                <select name = "role_assignment">
+                                    <option value="admin">Admin</option>
+                                    <option value="project_manager">Project Manager</option>
+                                    <option value="developer">Developer</option>
+                                    <option value="submitter">Submitter</option>
+                                </select>
+                                <br>
+                                <br>
+                                <button type = "submit" class = "remove_btn" name = "pruser_edit">Save Changes</button>
+                                <button onclick = "cancel()" class = "remove_btn" name = "pruser_cancel">Cancel</button>
+                            </form>
+                        </div>
+
+                        {% if non_project_users|length != 0 %}
+            
+                            <div class = "admin_add_pruser">
+                                <h2>Add New Users to Your Project:</h2>
+                                <br>
+                                <form action = "{% url 'admin_manage_project_users' institution_id=institution.id admin_id=admin.id project_id=this_project.id %}" method = "POST" class = "non_pruser_form">
+                                    {% csrf_token %}
+                                    <select name = "non_pruser_select" class = "non_pruser_select" placeholder = "Select New Users" size = "5" multiple>
+                                        {% for user in non_project_users %}
+                        
+                                            <!-- new new -->
+
+                                            {% if user in all_admin %}
+                                                <option value="{{user.id}}">{{user.username}} : Admin</option>
+                                            {% elif user in all_devs %}
+                                                <option value="{{user.id}}">{{user.username}} : Developer</option>
+                                            {% elif user in all_pm %}
+                                                <option value="{{user.id}}">{{user.username}} : Project Manager</option>
+                                            {% elif user in all_submitters %}
+                                                <option value="{{user.id}}">{{user.username}} : Submitter</option>
+                                            {% else %}
+                                                <option value="{{user.id}}">{{user.username}} : N/A</option>
+                                            {% endif %}
+                            
+                                        {% endfor %}
+                                    </select><br><br>
+                
+                                    <button type = "submit" class = "non_pruser_submit" name = "add_non_pruser">Add Users</button>
+                
+                                </form>
+                            </div>
+
+                            <script>
+
+                                $(document).ready(function () {
+                                    $('.non_pruser_select').selectize({
+                                        sortField: 'text'
+                                    });
+                                });
+                
+                            </script>
+            
+                        {% endif %}
+            
+                    </div>
+            
+                <script>
+            
+                    function show_edit(id) {
+                        document.querySelector('.admin_edit_pruser').style.display = 'block';
+                        // document.querySelector('.admin_pruser_table').style.display = 'none';
+            
+                        add = document.querySelector('.admin_add_pruser')
+            
+                        if (add) {
+                            add.style.display = 'none';
+                        }
+            
+                        // document.querySelector('.hidden_pruser_table').style.display = 'block';
+            
+                        user_row = document.getElementById(`${id}_row`);
+                        user_row.style.backgroundColor = '#162938';
+                        
+                        user_row_data = user_row.getElementsByTagName('td');
+            
+                        for (let i = 0; i < user_row_data.length; i++) {
+                            user_row_data[i].style.color = 'ghostwhite';
+                        }
+            
+                        buttons  = document.getElementsByClassName('pruser_table_buttons')
+            
+                        for (let i = 0; i < buttons.length; i++) {
+                            buttons[i].style.display = 'none';
+                        }
+            
+                        header = document.getElementById('project_edit_header')
+            
+                        header.style.display = 'none';
+            
+                        // user_row_data.forEach(
+                        //     user => {
+                        //         user.style.color = '#162938';
+                        //     }
+                        // )
+            
+                        hidden_field = document.getElementById('hidden_pruser_input');
+                        hidden_field.value = `${id}`;
+            
+                        document.querySelector('.edit_pruser').value = `${id}`;
+                    }
+            
+                    function cancel() {
+                        document.querySelector('.admin_edit_pruser').style.display = 'none';
+            
+                        id = document.querySelector('.edit_pruser').value
+            
+                        row = document.getElementById(`${id}_row`);
+            
+                        row.style.backgroundColor = 'ghostwhite';
+            
+                        data = row.getElementsByTagName('td')
+            
+                        for (let i = 0; i < data.length; i++) {
+                            data[i].style.color = '#162938';
+                        }
+            
+                        buttons = document.getElementsByClassName('pruser_table_buttons')
+            
+                        for (let i = 0; i < buttons.length; i++) {
+                            buttons[i].style.display = 'block';
+                        }
+            
+                        header = document.getElementById('project_edit_header')
+            
+                        header.style.display = 'block';
+            
+                        // document.querySelector('.admin_pruser_table').style.display = 'block';
+                        document.querySelector('.admin_add_pruser').style.display = 'block';
+                    }
+                    
+                    function confirmation(id) {
+            
+                        add = document.querySelector('.admin_add_pruser')
+            
+                        if (add) {
+                            add.style.display = 'none';
+                        }
+            
+                        // document.querySelector('.admin_add_pruser').style.display = 'none';
+                        // document.querySelector('.admin_pruser_table').style.display = 'none';
+                        // document.querySelector('.hidden_pruser_table').style.display = 'block';
+                        document.querySelector('.admin_remove_pruser').style.display = 'block';
+            
+                        user_row = document.getElementById(`${id}_row`);
+                        user_row.style.backgroundColor = '#162938';
+            
+                        user_row_data = user_row.getElementsByTagName('td');
+            
+                        for (let i = 0; i < user_row_data.length; i++) {
+                            user_row_data[i].style.color = 'ghostwhite';
+                        }
+            
+                        buttons = document.getElementsByClassName('pruser_table_buttons')
+
+                        for (let i = 0; i < buttons.length; i++) {
+                            buttons[i].style.display = 'none';
+                        }
+
+                        // user_row_data.forEach(
+                        //     user => {
+                        //         user.style.color = '#162938';
+                        //     }
+                        // )
+            
+                        document.getElementById('hidden_remove_input').value = `${id}`;
+
+                        header = document.getElementById('project_edit_header')
+            
+                        header.style.display = 'none';
+
+                    }
+            
+                    function keep() {
+                        document.querySelector('.admin_remove_pruser').style.display = 'none';
+                        // document.querySelector('.hidden_pruser_table').style.display = 'none';
+                        document.querySelector('.admin_add_pruser').style.display = 'block';
+                        // document.querySelector('.admin_pruser_table').style.display = 'block';
+
+                        buttons = document.getElementsByClassName('pruser_table_buttons')
+
+                        for (let i = 0; i < buttons.length; i++) {
+                            buttons[i].style.display = 'block';
+                        }
+
+                        header = document.getElementById('project_edit_header')
+            
+                        header.style.display = 'block';
+
+                    }
+            
+                </script>
+
+            </div>
+        </div>
+    </body>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+</html>

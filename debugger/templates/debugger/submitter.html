@@ -1,0 +1,196 @@
+{% extends "debugger/submitter_layout.html" %}
+
+{% block body %}
+
+{% if inProject %}
+
+    {% if all_my_bugs|length == 0 %}
+        <div class = "no_bugs_container">
+            <div class = "submitter_no_bugs">
+                <h1>This page will display all of the bugs you've created, go to View Tickets to get started</h1>
+            </div>
+        </div>
+    {% elif everythingResolved %}
+
+        <div class = "no_bugs_container">
+            <div class = "submitter_no_bugs">
+                <h1>Congrats, all of your projects are BugFree!</h1>
+            </div>
+        </div>
+
+    {% else %}
+
+        <div class = "chart_whole_container">
+
+            <h3 id = "submitter_chart_title">Overview of your Tickets</h3>
+        
+            <div class = "submitter_chart_container">
+
+                <div class = "indiv_chart_container">
+
+                    <div style = "height: 200px" class = "these_charts">
+                        <canvas id="chart1"></canvas>
+                    </div>     
+                    
+                    <h3 class = "chart_header">Tickets By Priority</h3>
+
+                </div>
+
+                
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                
+                <script>
+                    const ctx = document.getElementById('chart1');
+                
+                    new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Low', 'Medium', 'High'],
+                        datasets: [{
+                        label: '# of Tickets of this Type',
+                        data: ['{{low}}', '{{med}}', '{{high}}'],
+                        borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: '#D3D3D3'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: '#D3D3D3'
+                            }
+                        }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                    });
+                </script>
+
+
+                <div class = "indiv_chart_container">
+
+                    <div style = "height: 200px" class = "these_charts">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                    
+                    <h3 class = "chart_header">Tickets By Type</h3>
+
+                </div>
+
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+                <script>
+                    const ctx2 = document.getElementById('chart2');
+
+                    new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Bugs', 'Requests', 'Other'],
+                        datasets: [{
+                        data: ['{{errors}}', '{{requests}}', '{{other}}'],
+                        borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                display: false
+                            }
+                        }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                    });
+                </script>
+
+
+                <div class = "indiv_chart_container">
+
+                    <div style = "height: 200px" class = "these_charts">
+                        <canvas id="chart3"></canvas>
+                    </div>
+                    
+                    <h3 class = "chart_header">Tickets By Status</h3>
+
+                </div>
+
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+                <script>
+                    const ctx3 = document.getElementById('chart3');
+
+                    new Chart(ctx3, {
+                    type: 'bar',
+                    data: {
+                        labels: ['New', 'Open', 'In Progress', 'Resolved', 'Info Required'],
+                        datasets: [{
+                        label: '# of Tickets of this Status',
+                        data: ['{{new}}', '{{open}}', '{{progress}}', '{{resolved}}', '{{info}}'],
+                        borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: '#D3D3D3'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: '#D3D3D3'
+                            }
+                        }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                    });
+                </script>
+
+
+            </div>
+
+        </div>
+
+
+
+    {% endif %}
+
+{% else %}
+    <div class = "no_project_container">
+        <div class = "submitter_no_project">
+            <h2>Please wait until you're assigned to a Project by an Admin or Project Manager</h2>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,264 @@
+{% extends "debugger/pm_layout.html" %}
+
+{% block body %}
+
+    <div class = "pm_project_user_container">
+
+        <div class = "admin_manage_pruser">
+
+            <h3 class = "manage_users_header">Manage/Remove Users</h3><br><br>
+
+            <table class = "admin_pruser_table">
+
+                <thead>
+
+                    <tr class = "admin_pruser_header">
+                        <td>Username:</td>
+                        <td>Role:</td>
+                        <td id = "pm_project_header">Edit/Remove:</td>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for user in these_users %}
+
+                    <tr id = "{{user.id}}_row" class = "admin_pruser_data">
+                        <td>{{user.username}}</td>
+
+                        {% if user in all_devs %}
+                            <td>Developer</td>
+                        {% elif user in all_submitters %}
+                            <td>Submitter</td>
+                        {% else %}
+                            <td>N/A</td>
+                        {% endif %}
+
+                        <td class = "pruser_table_buttons"><button class = "edit_pruser" onclick = "show_edit('{{user.id}}')" >Edit Role</button><button class = "remove_pruser" onclick = "confirmation('{{user.id}}')">Remove User</button></td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            <script>
+
+                $(document).ready(function () {
+                    $('.admin_pruser_table').DataTable();
+                });
+
+            </script>
+
+        </div>
+
+        {% if non_project_users|length != 0 %}
+
+            <div class = "admin_add_pruser">
+                <h2>Add New Users to Your Project:</h2>
+                <br>
+                <form action = "{% url 'pm_manage_project_users' institution_id=institution.id user_id=user.id project_id=this_project.id %}" method = "POST" class = "non_pruser_form">
+                    {% csrf_token %}
+                    <select name = "non_pruser_select" class = "non_pruser_select" placeholder = "Select New Users" size = "5" multiple>
+                        {% for user in non_project_users %}
+        
+                        <!-- new new -->
+
+                            {% if user in all_devs %}
+                                <option value="{{user.id}}">{{user.username}} : Developer</option>
+                            {% elif user in all_submitters %}
+                                <option value="{{user.id}}">{{user.username}} : Submitter</option>
+                            {% else %}
+                                <option value="{{user.id}}">{{user.username}} : N/A</option>
+                            {% endif %}
+            
+                        {% endfor %}
+                    </select><br><br>
+
+                    <button type = "submit" class = "non_pruser_submit" name = "add_non_pruser">Add User</button>
+
+                </form>
+            </div>
+
+            <script>
+
+                $(document).ready(function () {
+                    $('.non_pruser_select').selectize({
+                        sortField: 'text'
+                    });
+                });
+
+            </script>
+
+        {% endif %}
+
+        <div class = "admin_remove_pruser" style = "display:none">
+            <h2>Are you sure you want to remove this user?</h2>
+            <form action = "{% url 'pm_manage_project_users' institution_id=institution.id user_id=user.id project_id=this_project.id %}" method = "POST">
+                {% csrf_token %}
+                <input type = "hidden" id = "hidden_remove_input" name = "hidden_remove_input">
+                <br>
+                <button type = "submit" class = "remove_btn" name = "pruser_remove">Yes</button>
+                <button onclick = "keep()" class = "remove_btn" name = "pruser_keep">No</button>
+            </form>
+        </div>
+
+        <div class = "admin_edit_pruser" style = "display:none">
+            <h2>Select a New Role for this User:</h2>
+            <form action = "{% url 'pm_manage_project_users' institution_id=institution.id user_id=user.id project_id=this_project.id %}" method = "POST">
+                {% csrf_token %}
+                <input type = "hidden" id = "hidden_pruser_input" name = "hidden_pruser_input">
+                <br>
+                <select name = "role_assignment">
+                    <option value="developer">Developer</option>
+                    <option value="submitter">Submitter</option>
+                </select>
+                <br>
+                <br>
+                <button type = "submit" class = "remove_btn" name = "pruser_edit">Save Changes</button>
+                <button onclick = "cancel()" class = "remove_btn" name = "pruser_cancel">Cancel</button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+
+        function show_edit(id) {            
+            
+            add = document.querySelector('.admin_add_pruser')
+
+            if (add) {
+
+                add.style.display = 'none';
+
+            }
+
+            document.querySelector('.admin_edit_pruser').style.display = 'block';
+            
+            user_row = document.getElementById(`${id}_row`);
+            user_row.style.backgroundColor = '#162938';
+                        
+            user_row_data = user_row.getElementsByTagName('td');
+            
+            for (let i = 0; i < user_row_data.length; i++) {
+                user_row_data[i].style.color = 'ghostwhite';
+            }
+            
+            buttons  = document.getElementsByClassName('pruser_table_buttons')
+            
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].style.display = 'none';
+            }
+            
+            header = document.getElementById('pm_project_header')
+            
+            header.style.display = 'none';
+            
+            hidden_field = document.getElementById('hidden_pruser_input');
+            hidden_field.value = `${id}`;
+            
+            document.querySelector('.edit_pruser').value = `${id}`;
+        }
+            
+        function cancel() {
+            add = document.querySelector('.admin_add_pruser')
+
+            if (add) {
+
+                add.style.display = 'block';
+
+            }
+
+            document.querySelector('.admin_edit_pruser').style.display = 'none';
+            
+            id = document.querySelector('.edit_pruser').value
+            
+            row = document.getElementById(`${id}_row`);
+            
+            row.style.backgroundColor = 'ghostwhite';
+            
+            data = row.getElementsByTagName('td')
+            
+            for (let i = 0; i < data.length; i++) {
+                data[i].style.color = '#162938';
+            }
+            
+            buttons = document.getElementsByClassName('pruser_table_buttons')
+            
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].style.display = 'block';
+            }
+            
+            header = document.getElementById('pm_project_header')
+            
+            header.style.display = 'block';
+            
+
+        }
+                    
+        function confirmation(id) {
+
+            add = document.querySelector('.admin_add_pruser')
+
+            if (add) {
+
+                add.style.display = 'none';
+
+            }
+            
+            document.querySelector('.admin_remove_pruser').style.display = 'block';
+            
+            user_row = document.getElementById(`${id}_row`);
+            user_row.style.backgroundColor = '#162938';
+            
+            user_row_data = user_row.getElementsByTagName('td');
+            
+            for (let i = 0; i < user_row_data.length; i++) {
+                user_row_data[i].style.color = 'ghostwhite';
+            }
+            
+            buttons = document.getElementsByClassName('pruser_table_buttons')
+
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].style.display = 'none';
+            }
+            
+            document.getElementById('hidden_remove_input').value = `${id}`;
+
+            header = document.getElementById('pm_project_header')
+            
+            header.style.display = 'none';
+
+        }
+            
+        function keep() {
+
+            add = document.querySelector('.admin_add_pruser')
+
+            if (add) {
+
+                add.style.display = 'block';
+
+            }
+
+            document.querySelector('.admin_remove_pruser').style.display = 'none';
+
+            buttons = document.getElementsByClassName('pruser_table_buttons')
+
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].style.display = 'block';
+            }
+
+            header = document.getElementById('pm_project_header')
+            
+            header.style.display = 'block';
+
+        }
+
+    </script>
+
+{% endblock %}

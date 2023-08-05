@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang = "en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> BugFree </title>
+        <link href = "//cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" rel = "stylesheet">
+        <link rel="stylesheet" href="{% static 'debugger/newstyles.css' %}">
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+        <script src = "//cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+
+    </head>
+
+    <body>
+        <div class = "admin_dashboard_wrapper">
+            <ul>
+                <li>Signed in as: Submitter</li>
+                <li><a href = "{% url 'submitter' institution_id=institution.id user_id=user.id %}">Dashboard Home</a></li>
+                {% if inProject %}
+                    <li><a href = "{% url 'submitter_tickets' institution_id=institution.id user_id=user.id %}">View Tickets</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <div class = "universal_container">
+            <div class = "upper_wrapper">
+                <ul>
+                    {% if isUnread %}
+                        <li><a href = "{% url 'submitter_notifications' institution_id=institution.id user_id=user.id %}"><ion-icon name="notifications-circle-outline" class = "ion"></ion-icon>Notifications</a></li>
+                    {% else %}
+                        <li><a href = "{% url 'submitter_notifications' institution_id=institution.id user_id=user.id %}"><ion-icon name="notifications-outline" class = "ion"></ion-icon>Notifications</a></li>
+                    {% endif %}
+
+                    <li><a href = "{% url 'logout' %}">Logout</a></li>
+                    <li><a href = "{% url 'submitter_leave' institution_id=institution.id user_id=user.id %}">Leave Institution</a></li>
+
+                </ul>
+            </div>
+            <div class = "body_container">
+                {% block body %}
+                {% endblock %}
+            </div>
+        </div>
+    </body>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+</html>

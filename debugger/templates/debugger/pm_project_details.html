@@ -1,0 +1,195 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> BugFree </title>
+        <link href = "//cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" rel = "stylesheet">
+        <link rel="stylesheet" href="{% static 'debugger/newstyles.css' %}">
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+        <script src = "//cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+
+    </head>
+    <body>
+        <div class = "admin_dashboard_wrapper">
+            <ul>
+                <li>Signed in as: Project Manager</li>
+                <li><a href = "{% url 'pm' institution_id=institution.id user_id=user.id %}">Dashboard Home</a></li>
+                {% if inProject %}
+                    <li><a href = "{% url 'pm_manage_projects' institution_id=institution.id user_id=user.id %}">View Projects</a></li>
+                    <li><a href = "{% url 'pm_tickets' institution_id=institution.id user_id=user.id %}">View Tickets</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <div class = "detail_universal_container">
+            <div class = "upper_wrapper">
+                <ul>
+                    {% if isUnread %}
+                        <li><a href = "{% url 'pm_notifications' institution_id=institution.id user_id=user.id %}"><ion-icon name="notifications-circle-outline" class = "ion"></ion-icon>Notifications</a></li>
+                    {% else %}
+                        <li><a href = "{% url 'pm_notifications' institution_id=institution.id user_id=user.id %}"><ion-icon name="notifications-outline" class = "ion"></ion-icon>Notifications</a></li>
+                    {% endif %}
+
+                    <li><a href = "{% url 'logout' %}">Logout</a></li>
+                    <li><a href = "{% url 'pm_leave' institution_id=institution.id user_id=user.id %}">Leave Institution</a></li>
+
+                </ul>
+            </div>
+            <div class = "body_container">
+
+                <div class = "project_detail_container">
+
+                    <div class = "project_description_container">
+                        <h3 class = "manage_users_header">Project Details</h3><br>
+            
+                        <div class = "inner_description_holder">
+            
+                            <div class = "project_name_div">
+                                <h4>Project Title:</h4><br>
+                                <h5>{{project.title}}</h5>
+                            </div>
+            
+                            <div class = "project_description_div">
+                                <h4>Project Description:</h4><br>
+                                <h5>{{project.description}}</h5>
+                            </div>
+            
+                        </div>
+            
+                    </div>
+            
+                    <div class = "project_extra_container">
+            
+                        <div class = "project_personnel_container">
+            
+                            <h3 class = "manage_users_header">Assigned Personnel</h3><br><br>
+            
+                            <table class = "personnel_table" style = "width:500px">
+            
+                                <thead>
+            
+                                    <tr class = "personnel_header">
+                                        <td>Username</td>
+                                        <td>Email</td>
+                                        <td>Role</td>
+                                    </tr>
+            
+                                </thead>
+            
+                                <tbody>
+            
+                                    {% for user in all_users %}
+            
+                                        <tr class = "personnel_data">
+            
+                                            <td>{{user.username}}</td>
+                                            <td>{{user.email}}</td>
+                                            
+                                            {% if user in all_admin %}
+                                                <td>Admin</td>
+                                            {% elif user in all_pm %}
+                                                <td>Project Manager</td>
+                                            {% elif user in all_devs %}
+                                                <td>Developer</td>
+                                            {% elif user in all_submitters %}
+                                                <td>Submitter</td>
+                                            {% else %}
+                                                <td>N/A</td>
+                                            {% endif %}
+            
+                                        </tr>
+            
+                                    {% endfor %}
+            
+                                </tbody>
+            
+                            </table>
+            
+                        </div>
+            
+            
+                        <script>
+                        
+                            $(document).ready(function () {
+                                $('.personnel_table').DataTable();
+                            });
+            
+                        </script>
+            
+            
+                        <div class = "project_tickets_container">
+            
+                            <h3 class = "manage_users_header">Tickets for this Project</h3><br><br>
+            
+                            <table class = "project_tickets_table" style = "width:550px">
+            
+                                <thead>
+            
+                                    <tr class = "tickets_header">
+            
+                                        <td>Title</td>
+                                        <td>Project</td>
+                                        <td>Ticket Priority</td>
+                                        <td>Ticket Status</td>
+                                        <td>Ticket Type</td>
+                                        <td>Created</td>
+                                        <td>More Details</td>
+            
+                                    </tr>
+            
+                                </thead>
+            
+                                <tbody>
+            
+                                    {% for bug in all_bugs %}
+            
+                                        <tr class = "tickets_data">
+            
+                                            <td>{{bug.title}}</td>
+            
+                                            {% for project in bug.project_bugs.all %}
+                                                <td>{{ project.title }}</td>
+                                            {% endfor %}
+            
+                                            <td>{{bug.priority}}</td>
+                                            <td>{{bug.status}}</td>
+                                            <td>{{bug.type}}</td>
+                                            <td>{{bug.created}}</td>
+                                            <td class = "detail_table_element"><a href = "{% url 'pm_ticket_details' institution_id=institution.id user_id=user.id ticket_id=bug.id %}">Ticket Details</a></td>
+            
+                                        </tr>
+            
+                                    {% endfor %}
+            
+                                </tbody>
+            
+                            </table>
+                            
+                        </div>
+            
+                        <script>
+                        
+                            $(document).ready(function () {
+                                $('.project_tickets_table').DataTable();
+                            });
+            
+                        </script>        
+            
+                    </div>
+            
+                </div>
+
+            </div>
+        </div>
+    </body>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+</html>

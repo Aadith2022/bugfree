@@ -1,0 +1,74 @@
+{% extends "debugger/pm_layout.html" %}
+
+{% block body %}
+
+    <div class = "submitter_tickets_container">
+
+        <div class = "submitter_view_tickets">
+
+            {% if all_bugs|length == 0 %}
+                <div class = "submitter_no_tickets">
+                    <h2>There are no Bugs in your projects, wait until a submitter creates one to view it here</h2>
+                </div>
+            {% else %}
+                <div class = "submitter_ticket_page_container">
+
+                    <h3 class = "manage_users_header">Search Tickets</h3><br><br>
+
+                    <table class = "ticket_list">
+
+                        <thead>
+
+                            <tr class = "ticket_list_header">
+                                <td>Title</td>
+                                <td>Project</td>
+                                <td>Ticket Priority</td>
+                                <td>Ticket Status</td>
+                                <td>Ticket Type</td>
+                                <td>Created</td>
+                                <td>More Details</td>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for bug in all_bugs %}
+
+                                <tr class = "ticket_list_data">
+                                    <td>{{ bug.title }}</td>
+
+                                    {% for project in bug.project_bugs.all %}
+                                        <td>{{ project.title }}</td>
+                                    {% endfor %}
+
+                                    <td>{{ bug.priority }}</td>
+                                    <td>{{ bug.status }}</td>
+                                    <td>{{ bug.type }}</td>
+                                    <td>{{ bug.created }}</td>
+                                    <td><a href = "{% url 'pm_ticket_details' institution_id=institution.id user_id=user.id ticket_id=bug.id %}">More Details</a></td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <script>
+
+                    $(document).ready(function () {
+                        $('.ticket_list').DataTable();
+                    });
+
+                </script>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+{% endblock %}

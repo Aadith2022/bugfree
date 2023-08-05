@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> BugFree </title>
+        <link href = "//cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" rel = "stylesheet">
+        <link rel="stylesheet" href="{% static 'debugger/newstyles.css' %}">
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+        <script src = "//cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+
+    </head>
+
+    <body>
+        <div class = "admin_dashboard_wrapper">
+            <ul>
+                <li>Signed in as: Submitter</li>
+                <li><a href = "{% url 'submitter' institution_id=institution.id user_id=user.id %}">Dashboard Home</a></li>
+                {% if inProject %}
+                    <li><a href = "{% url 'submitter_tickets' institution_id=institution.id user_id=user.id %}">View Tickets</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <div class = "detail_universal_container">
+            <div class = "upper_wrapper">
+                <ul>
+                    {% if isUnread %}
+                        <li><a href = "{% url 'submitter_notifications' institution_id=institution.id user_id=user.id %}"><ion-icon name="notifications-circle-outline" class = "ion"></ion-icon>Notifications</a></li>
+                    {% else %}
+                        <li><a href = "{% url 'submitter_notifications' institution_id=institution.id user_id=user.id %}"><ion-icon name="notifications-outline" class = "ion"></ion-icon>Notifications</a></li>
+                    {% endif %}
+
+                        <li><a href = "{% url 'logout' %}">Logout</a></li>
+                        <li><a href = "{% url 'submitter_leave' institution_id=institution.id user_id=user.id %}">Leave Institution</a></li>
+                        
+                </ul>
+            </div>
+            <div class = "detail_body_container">
+
+                <div class = "ticket_information_container">
+
+                    <div class = "ticket_detail_table">
+            
+                        <h3 id = "ticket_detail_header">Details for Ticket #{{bug.id}}</h3>
+                
+                        <table class = "detail_table">
+                
+                            <thead>
+
+                                <tr class = "detail_header">
+                                    <td>Ticket Title:</td>
+                                    <td>Ticket Description:</td>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr class = "detail_data">
+                                    <td>{{bug.title}}</td>
+                                    <td>{{bug.content}}</td>
+                                </tr>
+                    
+                                <tr class = "detail_header">
+                                    <td>Assigned Developer:</td>
+                                    <td>Submitter:</td>
+                                </tr>
+                    
+                                <tr class = "detail_data">
+                                    {% if this_dev %}
+                                        <td>{{this_dev.username}}</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                    <td>{{this_submitter.username}}</td>
+                                </tr>
+                    
+                                <tr class = "detail_header">
+                                    <td>Project:</td>
+                                    <td>Ticket Priority:</td>
+                                </tr>
+                    
+                                <tr class = "detail_data">
+                                    <td>{{this_project.title}}</td>
+                                    <td>{{bug.priority}}</td>
+                                </tr>
+                    
+                                <tr class = "detail_header">
+                                    <td>Ticket Status:</td>
+                                    <td>Ticket Type:</td>
+                                </tr>
+                    
+                                <tr class = "detail_data">
+                                    <td>{{bug.status}}</td>
+                                    <td>{{bug.type}}</td>
+                                </tr>
+                    
+                                <tr class = "detail_header">
+                                    <td>Created:</td>
+                                    <td>Updated:</td>
+                                </tr>
+                    
+                                <tr class = "detail_data">
+                                    <td>{{bug.created}}</td>
+                                    {% if updated %}
+                                        <td>{{updated}}</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                </tr>
+
+                            </tbody>
+                
+                        </table>
+
+                
+                    </div>
+
+                    
+                    <div class = "ticket_history_table">
+
+                        <h3 id = "history_table_header">Ticket History</h3><br><br>
+
+                        <table class = "history_table">
+
+                            <thead>
+
+                                <tr class = "history_header">
+                                    <td>Property:</td>
+                                    <td>Old:</td>
+                                    <td>New:</td>
+                                    <td>Date Changed:</td>
+                                    <td>Changer:</td>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for history in this_history %}
+
+                                    <tr class = "history_data">
+                                        <td>{{history.property}}</td>
+                                        <td>{{history.old}}</td>
+                                        <td>{{history.new}}</td>
+                                        <td>{{history.date}}</td>
+                                        <td>{{history.changer}}</td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                        <script>
+                
+                            $(document).ready(function () {
+                                $('.history_table').DataTable();
+                            });
+                
+                        </script>
+
+                    </div>
+
+                </div>
+
+                <div class = "ticket_comment_container">
+
+                    <div class = "ticket_comments_table">
+
+                        <h3 class = "manage_users_header">Ticket Comments</h3><br><br>
+
+                        <table class = "comments_table">
+
+                            <thead>
+                                <tr class = "comment_header">
+                                    <td>Commenter:</td>
+                                    <td>Message:</td>
+                                    <td>Created:</td>
+                                </tr>                                
+                            </thead>
+
+                            <tbody>
+
+                                {% for comment in all_bug_comments %}
+
+                                    {% with sender=comment.commenter %}
+                                        <tr class = "comments_data">
+                                            <td>{{sender.username}}</td>
+                                                <td>{{comment.message}}</td>
+                                                <td>{{comment.timestamp}}</td>
+                                        </tr>
+                                    {% endwith %}
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                        <script>
+
+                                $(document).ready(function () {
+                                $('.comments_table').DataTable();
+                            });
+
+                        </script>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </body>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+</html>

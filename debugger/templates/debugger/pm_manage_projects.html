@@ -1,0 +1,76 @@
+{% extends "debugger/pm_layout.html" %}
+
+{% block body %}
+
+    <div class = "manage_projects_flex_container">
+
+        {% if all_users|length == 0 %}
+            <div class = "admin_no_users_project">
+                <h2>Please wait until more users join this Institution</h2>
+            </div>
+        {% else %}
+
+            {% if all_projects.count == 0 %} 
+
+                <div class = "admin_no_projects">
+                    <h2>This Institution does not have any projects yet, wait until one gets created to view it here</h2>
+                </div>
+
+            {% elif these_projects|length == 0 %}
+
+                <div class = "admin_no_projects">
+                    <h2>Please wait until you are assigned to a Project by an Admin</h2>
+                </div>
+
+            {% else %}
+
+                <div class = "pm_project_page_container">
+
+                    <h3 class = "manage_users_header">Search/Manage Projects</h3><br><br>
+
+                    <table class = "project_list">
+
+                        <thead>
+
+                            <tr class = "project_table_header">
+                                <td>Project Name</td>
+                                <td>Project Description</td>
+                                <td>Manage</td>
+                                <td>More Details</td>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for this_project in these_projects %}
+                                <tr class = "table_project_data">
+                                    <td class = "page_project_title">{{this_project.title}}</td>
+                                    <td class = "page_project_description">{{this_project.description}}</td>
+                                    <td class = "page_project_manage"><a href = "{% url 'pm_manage_project_users' institution_id=institution.id user_id=user.id project_id=this_project.id %}">Manage Project Users</a></td>
+                                    <td class = "page_project_details"><a href = "{% url 'pm_project_details' institution_id=institution.id user_id=user.id project_id=this_project.id %}">More Details</a></td>
+                                    <!-- we will also need to make a column in order to edit the project/manage the users for the project -->
+                                </tr>
+                            {% endfor %} 
+
+                        </tbody>
+   
+                    </table>
+
+                </div>
+
+                <script>
+
+                    $(document).ready(function () {
+                        $('.project_list').DataTable();
+                    });
+
+                </script>
+
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+{% endblock %}

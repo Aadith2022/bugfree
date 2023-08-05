@@ -1,0 +1,255 @@
+{% extends "debugger/layout.html" %}
+
+{% block body %}
+
+<div class = "admin-flex-container">
+    
+    {% if all_users|length == 0 %}
+
+        <div class = "admin_no_users">
+            <h2>Please wait until others join your Institution</h2>
+        </div>
+
+    {% else %}
+        
+        <div class = "page_container">
+            <!-- <input class = "user_page_search" type = "text" onkeyup = "search_username()" placeholder= "Search users..."> -->
+
+            <h3 id = "manage_user_header">Search/Manage Users</h3><br><br>
+            
+            <table class = "user_pages" style = "width:900px">
+
+                <thead>
+                    
+                    <tr class = "page_table_header">
+                        <td>Username:</td>
+                        <td>Email:</td>
+                        <td>Role:</td>
+                        <td id = "edit_user_heading">Edit:</td>
+                        
+                        <!-- new remove feature -->
+                        <td id = "remove_user_heading">Remove:</td>
+                    </tr>
+
+                </thead>
+
+                
+                <tbody>
+                    
+                    {% for user in all_users %}
+                        <tr id = "{{user.id}}_row" class = "page_table_data">
+                            <td class = "page_username">{{user.username}}</td>
+                            <td class = "page_email">{{user.email}}</td>
+
+                            {% if user in all_admin %}
+                                <td class = "page_role">Admin</td>
+                            {% elif user in all_devs %}
+                                <td class = "page_role">Developer</td>
+                            {% elif user in all_pm %}
+                                <td class = "page_role">Project Manager</td>
+                            {% elif user in all_submitters %}
+                                <td class = "page_role">Submitter</td>
+                            {% else %}
+                                <td class = "page_role">N/A</td>
+                            {% endif %}
+
+                            <td class = "user_edit_class"><button class = "edit_user_button" name = "edit_user" onclick = "showedit('{{user.id}}')">Edit Role</button></td>
+
+                            <td class = "user_remove_class"><button class = "remove_user_button" name = "remove_user" onclick = "showremove('{{user.id}}')">Remove User</button></td>
+
+                        </tr>
+                    {% endfor %}
+
+                </tbody>
+
+   
+            </table>
+
+            <script>
+
+                $(document).ready(function () {
+                    $('.user_pages').DataTable();
+                });
+
+            </script>
+            
+        </div>
+
+        <div class = "admin_assign_user" style = "display:none">
+            <!-- <h2> Assign/Manage User Roles </h2>
+            <br> -->
+            <form action = "{% url 'admin_manage_users' institution_id=institution.id admin_id=admin.id %}" method = "POST">
+                {% csrf_token %}
+                <!-- <label for = "user_management"> Select one or more Users: </label>
+                <br>
+                <select name = "user_management" size = "5">
+                    {% for user in all_users %}
+
+                        <option value="{{user}}">{{user.username}}</option>
+
+                    {% endfor %}
+                </select>
+                <br>
+                <br> -->
+
+                <!-- new -->
+
+                <input type = "hidden" class = "hidden_manage_user" name = "hidden_manage_user">
+
+                <label for = "role_assignment"> Select a Role: </label>
+                <br>
+                <select name = "role_assignment">
+                    <option value="admin">Admin</option>
+                    <option value="project_manager">Project Manager</option>
+                    <option value="developer">Developer</option>
+                    <option value="submitter">Submitter</option>
+                </select>
+                <br>
+                <br>
+                <button type = "submit" class = "user_submit_btn" name = "user_submit">Submit</button>
+                <button type = "submit" class = "user_submit_btn" name = "user_submit_cancel">Cancel</button>
+                
+                <!-- <button onclick = "cancel()" class = "create_ticket_btn" name = "user_cancel">Cancel</button> -->
+            </form>
+        </div>
+
+        <div class = "admin_remove_user" style = "display:none">
+        
+            <h3>Are you sure you want to remove this user?</h3><br>
+
+            <form action = "{% url 'admin_manage_users' institution_id=institution.id admin_id=admin.id %}" method = "POST">
+                {% csrf_token %}
+
+                <input type = "hidden" class = "hidden_remove_user" name = "hidden_remove_user">
+                <button type = "submit" class = "user_submit_btn" name = "user_remove">Yes</button>
+                <button type = "submit" class = "user_submit_btn" name = "user_remove_cancel">No</button>
+
+            </form>
+
+        </div>
+
+    {% endif %}
+
+        <script>
+
+            function showremove(id) {
+
+                document.querySelector('.admin_remove_user').style.display = 'block';
+
+                document.querySelector('.hidden_remove_user').value = `${id}`;
+
+                row = document.getElementById(`${id}_row`);
+
+                row.style.backgroundColor = '#162938';
+                
+                heading = document.getElementById('edit_user_heading').style.display = 'none';
+
+                // new remove feature
+
+                remove_heading = document.getElementById('remove_user_heading').style.display = 'none';
+
+                buttons = document.getElementsByClassName('user_edit_class')
+
+                for (let i = 0; i < buttons.length; i++) {
+                    buttons[i].style.display = 'none';
+                }
+
+                // new remove feature
+
+                remove_buttons = document.getElementsByClassName('user_remove_class')
+
+                for (let i = 0; i < remove_buttons.length; i++) {
+                    remove_buttons[i].style.display = 'none'
+                }
+
+                data = row.getElementsByTagName('td');
+
+                for (let i = 0; i < data.length; i++) {
+                    data[i].style.color = 'ghostwhite';
+                }
+
+            }
+
+            function showedit(id) {
+
+                document.querySelector('.admin_assign_user').style.display = 'block';
+
+                document.querySelector('.hidden_manage_user').value = `${id}`;
+
+                row = document.getElementById(`${id}_row`);
+
+                row.style.backgroundColor = '#162938';
+
+                heading = document.getElementById('edit_user_heading').style.display = 'none';
+
+                // new remove feature
+
+                remove_heading = document.getElementById('remove_user_heading').style.display = 'none';
+
+                buttons = document.getElementsByClassName('user_edit_class')
+
+                for (let i = 0; i < buttons.length; i++) {
+                    buttons[i].style.display = 'none';
+                }
+
+                // new remove feature
+
+                remove_buttons = document.getElementsByClassName('user_remove_class')
+
+                for (let i = 0; i < remove_buttons.length; i++) {
+                    remove_buttons[i].style.display = 'none'
+                }
+
+                data = row.getElementsByTagName('td');
+
+                for (let i = 0; i < data.length; i++) {
+                    data[i].style.color = 'ghostwhite';
+                }
+
+                document.querySelector('.create_ticket_btn').value = `${id}`;
+
+            }
+
+            // function cancel() {
+            //     document.querySelector('.admin_assign_user').style.display = 'none';
+
+            //     id = document.querySelector('.create_ticket_btn').value;
+
+            //     row = document.getElementById(`${id}_row`);
+
+            //     row.style.backgroundColor = "ghostwhite";
+
+            //     heading = document.getElementById('edit_user_heading').style.display = 'block';
+
+            //     // new remove feature
+
+            //     remove_heading = document.getElementById('remove_user_heading').style.display = 'block';
+
+            //     buttons = document.getElementsByClassName('user_edit_class');
+
+            //     for (let i = 0; i < buttons.length; i++) {
+            //         buttons[i].style.display = 'block';
+            //     }
+
+            //     // new remove feature
+
+            //     remove_buttons = document.getElementsByClassName('user_remove_class');
+
+            //     for (let i = 0; i < remove_buttons.length; i++) {
+            //         remove_buttons[i].style.display = 'block';
+            //     }
+
+            //     data = row.getElementsByTagName('td');
+
+            //     for (let i = 0; i < data.length; i++) {
+            //         data[i].style.color = '#162938';
+            //     }
+
+            // }
+
+        </script>
+
+
+</div>
+
+{% endblock %}

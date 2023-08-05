@@ -1,0 +1,108 @@
+{% extends "debugger/layout.html" %}
+
+{% block body %}
+
+    <div class = "pending_container">
+
+        <div class = "pending_secondary_container">
+
+            <form action = "{% url 'admin_pending' institution_id=institution.id admin_id=admin.id %}" method = "POST">
+                {% csrf_token %}
+
+                <button type = "submit" class = "create_ticket_btn" name = "pending_clear">Clear All Requests</button>
+                
+            </form><br><br>
+
+            <div class = "pending_table_container">
+
+                <h3 class = "manage_users_header">View all pending join requests</h3><br><br>
+
+                <table class = "pending_table">
+
+                    <thead>
+
+                        <tr class = "pending_header">
+                            <td>Username</td>
+                            <td>Email</td>
+                            <td>Accept</td>
+                            <td>Deny</td>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for user in all_pending %}
+
+                            <tr class = "pending_data">
+                                <td>{{user.username}}</td>
+                                <td>{{user.email}}</td>
+                                <td><button class = "edit_user_button" onclick = "submitadd('{{user.id}}')">Accept Join Request</button></td>
+                                <td><button class = "edit_user_button" onclick = "submitremove('{{user.id}}')">Deny Join Request</button></td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <script>
+
+                $(document).ready(function () {
+                    $('.pending_table').DataTable();
+                });
+
+            </script>
+
+            <form action = "{% url 'admin_pending' institution_id=institution.id admin_id=admin.id %}" id = "pending_add_form" method = "POST">
+                {% csrf_token %}
+
+                <input type = "hidden" id = "hidden_pending_add" name = "hidden_pending_add">
+                <input type = "hidden" name = "hidden_differ" value = "add_pending">
+
+            </form>
+
+            <form action = "{% url 'admin_pending' institution_id=institution.id admin_id=admin.id %}" id = "pending_remove_form" method = "POST">
+                {% csrf_token %}
+
+                <input type = "hidden" id = "hidden_pending_remove" name = "hidden_pending_remove">
+                <input type = "hidden" name = "hidden_differ" value = "remove_pending">
+
+            </form>
+
+        </div>
+
+        <script>
+
+            function submitadd(id) {
+
+                input = document.getElementById('hidden_pending_add');
+
+                input.value = `${id}`;
+
+                form = document.getElementById('pending_add_form');
+
+                form.submit();
+
+            }
+
+            function submitremove(id) {
+
+                input = document.getElementById('hidden_pending_remove');
+
+                input.value = `${id}`;
+
+                form = document.getElementById('pending_remove_form');
+
+                form.submit();
+
+            }
+
+        </script>
+
+    </div>
+
+{% endblock %}

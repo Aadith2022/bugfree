@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> BugFree </title>
+        <link href = "//cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" rel = "stylesheet">
+        <link rel="stylesheet" href="{% static 'debugger/newstyles.css' %}">
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+        <script src = "//cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+
+    </head>
+    <body>
+
+        <div class = "user_container">
+
+            <div class = "user_heading">
+                {% if inPending %}
+                    <h3 class = "manage_users_header">Please wait until you are accepted into the Institution</h3>
+                    <p>You may keep refreshing the page, or try logging in again, to see if you were accepted</p>
+                    <a href = "{% url 'logout' %}">Back to Home Page</a>
+                {% else %}
+                    <h3 class = "manage_users_header">Please wait until you are assigned a role by an Admin</h3>
+                    <p>You may keep refreshing the page, or try logging in again, to see if you have been assigned a role</p>
+                    <a href = "{% url 'logout' %}">Back to Home Page</a>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,347 @@
+{% extends "debugger/submitter_layout.html" %}
+
+{% block body %}
+    <div class = "submitter_tickets_container">
+
+        <div class = "submitter_view_tickets">
+
+            <button class = "add_ticket" onclick = "showdiv()">Create Ticket</button>
+
+            {% if all_bugs|length == 0 %}
+                <div class = "submitter_no_tickets">
+                    <h2>There are no Bugs in your projects, add one to get started</h2>
+                </div>
+            {% else %}
+                <div class = "submitter_ticket_page_container">
+
+                    <h3 class = "manage_users_header">Search Tickets</h3><br><br>
+
+                    <table class = "ticket_list">
+
+                        <thead>
+
+                            <tr class = "ticket_list_header">
+                                <td>Title</td>
+                                <td>Project</td>
+                                <td>Ticket Priority</td>
+                                <td>Ticket Status</td>
+                                <td>Ticket Type</td>
+                                <td>Created</td>
+                                <td>More Details</td>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for bug in all_bugs %}
+
+                                {% if bug in change_bug %}
+
+                                    <tr class = "ticket_list_data">
+                                        <td>{{ bug.title }}</td>
+
+                                        {% for project in bug.project_bugs.all %}
+                                            <td>{{ project.title }}</td>
+                                        {% endfor %}
+
+                                        <td>{{ bug.priority }}</td>
+                                        <td>{{ bug.status }}</td>
+                                        <td>{{ bug.type }}</td>
+                                        <td>{{ bug.created }}</td>
+
+                                        {% for project in bug.project_bugs.all %}
+                                            <td><button class = "action_ticket" onclick = "showaction('{{bug.type}}', '{{bug.priority}}', '{{project.title}}', '{{bug.status}}', '{{bug.title}}', '{{bug.content}}', '{{bug.id}}')">Action Required!</button></td>
+                                        {% endfor %}
+
+                                    </tr>
+
+                                {% else %}
+
+                                    <tr class = "ticket_list_data">
+                                        <td>{{ bug.title }}</td>
+
+                                        {% for project in bug.project_bugs.all %}
+                                            <td>{{ project.title }}</td>
+                                        {% endfor %}
+
+                                        <td>{{ bug.priority }}</td>
+                                        <td>{{ bug.status }}</td>
+                                        <td>{{ bug.type }}</td>
+                                        <td>{{ bug.created }}</td>
+                                        <td><a href = "{% url 'submitter_ticket_details' institution_id=institution.id user_id=user.id ticket_id=bug.id %}">More Details</a></td>
+                                    </tr>
+
+                                {% endif %}
+
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                    <script>
+            
+                        $(document).ready(function () {
+                            $('.ticket_list').DataTable();
+                        });
+            
+                    </script>
+
+                </div>
+            {% endif %}
+            
+
+        </div>
+
+        <div class = "submitter_create_ticket" style = "display:none">
+            <h3>Create a New Ticket</h3>
+            <form action = "{% url 'submitter_tickets' institution_id=institution.id user_id=user.id %}" method = "POST">
+                {% csrf_token %}
+                <input type = "text" name = "ticket_title" placeholder="Ticket Title" class = "ticket_title"><br><br>
+
+                <textarea name = "ticket_description" rows = "8" cols = "50" placeholder = "Ticket Description"></textarea><br><br>
+
+                <label for = "ticket_type">Ticket Type:</label><br><br>
+                <select name = "ticket_type" size = "3">
+                    <option value = "Bugs/Errors">Bugs/Errors</option>
+                    <option value = "Additional Feature Requests">Additional Feature Requests</option>
+                    <option value = "Other">Other</option>
+                </select><br><br>
+
+                <label for = "ticket_priority">Ticket Priority:</label><br><br>
+                <select name = "ticket_priority" size = "3">
+                    <option value = "Low">Low</option>
+                    <option value = "Medium">Medium</option>
+                    <option value = "High">High</option>
+                </select><br><br>
+
+                <label for = "ticket_project">Project:</label><br><br>
+                <select name = "ticket_project" id = "ticket_project" placeholder = "Select a Project" size = "4">
+                    {% for project in these_projects %}
+                        <option value = "{{project.title}}">{{project.title}}</option>
+                    {% endfor %}
+                </select>
+
+                <input type = "hidden" name = "ticket_status" value = "New"><br><br>
+
+                <button type = "submit" class = "pruser_btn" name = "ticket_submit">Submit</button>
+                <button onclick = "cancel()" class = "pruser_btn" name = "ticket_cancel">Go Back</button>
+
+            </form>
+
+            <div id = "myModal1" style = "display:none">
+
+                <div class = "modal_content">
+                    <span class = "close">&times;</span>
+                    <p id = "modal_text1"></p>
+                </div>
+        
+            </div>
+
+        </div>
+
+        <script>
+
+                $(document).ready(function () {
+                    $('#ticket_project').selectize({
+                        sortField: 'text'
+                    });
+                });
+
+        </script>
+
+
+        <div class = "submitter_action_ticket" style = "display:none">
+            <h3 class = "manage_users_header">Add Additional Information to This Ticket</h3><br>
+            <form action = "{% url 'submitter_tickets' institution_id=institution.id user_id=user.id %}" method = "POST">
+                {% csrf_token %}
+                <label for = "ticket_title">Update Title:</label><br><br>
+                <textarea name = "ticket_title" rows = "1" cols = "30" id = "this_ticket_title"></textarea><br><br><br>
+
+                <label for = "ticket_description">Update Description:</label><br><br>
+                <textarea name = "ticket_description" rows = "8" cols = "50" class = "ticket_description"></textarea><br><br><br>
+
+                <h3 class = "action_descriptor">Ticket Type:</h3><br>
+                <h5 class = "hidden_ticket_type"></h5><br><br><br>
+
+                <h3 class = "action_descriptor">Ticket Priority:</h3><br>
+                <h5 class = "hidden_ticket_priority"></h5><br><br><br>
+
+                <h3 class = "action_descriptor">Ticket Project:</h3><br>
+                <h5 class = "hidden_ticket_project"></h5><br><br><br>
+
+                <h3 class = "action_descriptor">Ticket Status:</h3><br>
+                <h5 class = "hidden_ticket_status"></h5><br><br><br>
+
+                <input type = "hidden" id = "this_hidden_ticket" name = "hidden_ticket">
+
+                <button type = "submit" class = "pruser_btn" name = "action_ticket_submit">Submit</button>
+                <button onclick = "action_cancel()" class = "pruser_btn" name = "ticket_cancel">Go Back</button>
+
+            </form>
+
+            <div id = "myModal2" style = "display:none">
+
+                <div class = "modal_content">
+                    <span class = "close">&times;</span>
+                    <p id = "modal_text2"></p>
+                </div>
+        
+            </div>
+
+        </div>
+
+    </div>
+
+    <style>
+
+        #myModal1 {
+            position: fixed;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        #myModal2 {
+            position: fixed;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal_content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            width: 80%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 3px;
+        }
+
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    </style>
+
+    <script>
+
+        function showdiv() {
+            document.querySelector('.submitter_view_tickets').style.display = 'none';
+            document.querySelector('.submitter_create_ticket').style.display = 'block';
+        }
+
+        function cancel() {
+            document.querySelector('.submitter_create_ticket').style.display = 'none';
+            document.querySelector('.submitter_view_tickets').style.display = 'block';
+        }
+
+        function showaction(type, priority, project, status, title, content, id) {
+            document.querySelector('.submitter_view_tickets').style.display = 'none';
+            document.querySelector('.submitter_action_ticket').style.display = 'block';
+            
+            document.querySelector('.hidden_ticket_type').innerHTML = `${type}`;
+            document.querySelector('.hidden_ticket_priority').innerHTML = `${priority}`;
+            document.querySelector('.hidden_ticket_project').innerHTML = `${project}`;
+            document.querySelector('.hidden_ticket_status').innerHTML = `${status}`;
+            document.getElementById('this_ticket_title').innerHTML = `${title}`;
+            document.querySelector('.ticket_description').innerHTML = `${content}`;
+
+            document.getElementById('this_hidden_ticket').value = `${id}`;
+        }
+
+        function action_cancel() {
+            document.querySelector('.submitter_action_ticket').style.display = 'none';
+            document.querySelector('.submitter_view_tickets').style.display = 'block';
+        }
+
+    </script>
+
+    {% if message %}
+
+    <script>
+
+        if ('{{message}}' == 'There already is a ticket with this title') {
+
+            document.querySelector('.submitter_view_tickets').style.display = 'none';
+            document.querySelector('.submitter_create_ticket').style.display = 'block';
+
+            modal = document.getElementById('myModal1')
+
+            p = document.getElementById('modal_text1')
+
+            p.innerHTML = '{{message}}'
+
+            close = document.getElementsByClassName('close')[0];
+
+            modal.style.display = 'block';
+
+            close.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+
+        } else if ('{{message}}' == 'Please choose a different title') {
+
+            document.querySelector('.submitter_view_tickets').style.display = 'none';
+            document.querySelector('.submitter_action_ticket').style.display = 'block';
+
+            document.querySelector('.hidden_ticket_type').innerHTML = '{{message_bug.type}}';
+            document.querySelector('.hidden_ticket_priority').innerHTML = '{{message_bug.priority}}';
+            document.querySelector('.hidden_ticket_project').innerHTML = '{{message_bug_project.title}}';
+            document.querySelector('.hidden_ticket_status').innerHTML = '{{message_bug.status}}';
+            document.getElementById('this_ticket_title').innerHTML = '{{message_bug.title}}';
+            document.querySelector('.ticket_description').innerHTML = '{{message_bug.content}}';
+
+            document.getElementById('this_hidden_ticket').value = '{{message_bug.id}}';
+
+            modal = document.getElementById('myModal2')
+
+            p = document.getElementById('modal_text2')
+
+            p.innerHTML = '{{message}}'
+
+            close = document.getElementsByClassName('close')[0];
+
+            modal.style.display = 'block';
+
+            close.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+            
+        }
+
+    </script>
+
+    {% endif %}
+
+{% endblock %}
