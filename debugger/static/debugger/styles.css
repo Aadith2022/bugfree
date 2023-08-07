@@ -95,7 +95,8 @@ header {
 }
 
 .home_description {
-    height: 275px;
+    height: fit-content;
+    padding-bottom: 20px;
     position: relative;
     width: 550px;
     border-radius: 5px;

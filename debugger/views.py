@@ -1445,10 +1445,13 @@ def admin_manage_projects(request, institution_id, admin_id):
 
                     #new
 
-                    if Project.objects.filter(title = title).exists():
-                        return render(request, "debugger/admin_manage_projects.html", {
-                            'institution':institution, 'message': 'There already is a project with this title', 'admin':user, 'all_projects':all_projects, 'all_users':all_users, 'all_admin':all_admin, 'all_devs':all_devs, 'all_pm':all_pm, 'all_submitters':all_submitters, 'all_messages':all_messages, 'isUnread':isUnread, 'all_pending':all_pending
-                        })
+                    for project in all_projects:
+                        if project.title == title:
+                            return render(request, "debugger/admin_manage_projects.html", {
+                                'institution':institution, 'message': 'There already is a project with this title', 'admin':user, 'all_projects':all_projects, 'all_users':all_users, 'all_admin':all_admin, 'all_devs':all_devs, 'all_pm':all_pm, 'all_submitters':all_submitters, 'all_messages':all_messages, 'isUnread':isUnread, 'all_pending':all_pending
+                            })
+                        else:
+                            continue                            
 
                     new_project = Project(title = title, description = content)
                     new_project.save()
@@ -1605,10 +1608,14 @@ def admin_manage_tickets(request, institution_id, admin_id):
                     new_title = request.POST['ticket_title']
 
                     if (this_bug.title != new_title):
-                        if Bug.objects.filter(title = new_title).exists():
-                            return render(request, "debugger/admin_manage_tickets.html", {
-                                'institution':institution, 'message':'There already is a ticket with this title', 'message_bug':this_bug, 'message_bug_dev':this_bug.developer, 'admin':user, 'all_messages':all_messages, 'isUnread':isUnread, 'all_bugs':all_bugs, 'all_projects':all_projects, 'all_pending':all_pending
-                            })
+
+                        for bug in all_bugs:
+                            if bug.title == new_title:
+                                return render(request, "debugger/admin_manage_tickets.html", {
+                                    'institution':institution, 'message':'There already is a ticket with this title', 'message_bug':this_bug, 'message_bug_dev':this_bug.developer, 'admin':user, 'all_messages':all_messages, 'isUnread':isUnread, 'all_bugs':all_bugs, 'all_projects':all_projects, 'all_pending':all_pending
+                                })
+                            else:
+                                continue                                
 
                         history = History(bug = this_bug, old = this_bug.title, new = new_title, property = 'Title Altered', changer = user)
                         history.save()
@@ -3189,6 +3196,206 @@ def pm_view_tickets(request, institution_id, user_id):
             for project in these_projects:
                 for bug in project.bugs.all():
                     all_bugs.append(bug)
+
+            if request.method == "POST":
+
+                if 'ticket_submit' in request.POST:
+
+                    this_bug_id = request.POST['hidden_ticket']
+
+                    this_bug = Bug.objects.get(pk = this_bug_id)
+
+                    new_title = request.POST['ticket_title']
+
+                    if (this_bug.title != new_title):
+
+                        for bug in all_bugs:
+                            if bug.title == new_title:
+                                return render(request, "debugger/pm_view_tickets.html", {
+                                    'institution':institution, 'message':'There already is a ticket with this title', 'message_bug':this_bug, 'message_bug_dev':this_bug.developer, 'user':user, 'isUnread':isUnread, 'inProject':inProject, 'user_messages':user_messages, 'all_bugs':all_bugs, 'these_projects':these_projects
+                                })
+                            else:
+                                continue                                
+
+                        history = History(bug = this_bug, old = this_bug.title, new = new_title, property = 'Title Altered', changer = user)
+                        history.save()
+
+                        updated_time = history.date
+
+                        this_bug.title = new_title
+                        this_bug.updated = updated_time
+                        this_bug.save()
+
+                    new_description = request.POST['ticket_description']
+
+                    if (this_bug.content != new_description):
+                        history = History(bug = this_bug, old = this_bug.content, new = new_description, property = 'Description Altered', changer = user)
+                        history.save()
+
+                        updated_time = history.date
+
+                        this_bug.content = new_description
+                        this_bug.updated = updated_time
+                        this_bug.save()    
+
+                    new_type = request.POST['ticket_type']
+
+                    if (this_bug.type != new_type):
+                        history = History(bug = this_bug, old = this_bug.type, new = new_type, property = "Type Altered", changer = user)
+                        history.save()
+
+                        updated_time = history.date
+
+                        this_bug.type = new_type
+                        this_bug.updated = updated_time
+                        this_bug.save()
+
+                    new_priority = request.POST['ticket_priority']
+
+                    if (this_bug.priority != new_priority):
+                        history = History(bug = this_bug, old = this_bug.priority, new = new_priority, property = "Priority Altered", changer = user)
+                        history.save()
+
+                        updated_time = history.date
+
+                        this_bug.priority = new_priority
+                        this_bug.updated = updated_time
+                        this_bug.save()            
+
+                    new_project = request.POST['ticket_project']
+
+                    bug_project = []
+
+                    for project in this_bug.project_bugs.all():
+                        bug_project.append(project)
+
+                    this_bug_project = bug_project[0]
+
+                    if (this_bug_project.title != new_project):
+                        history = History(bug = this_bug, old = this_bug_project.title, new = new_project, property = "Project Reassigned", changer = user)
+                        history.save()
+
+                        updated_time = history.date
+
+                        this_b_project = Project.objects.get(title = this_bug_project.title)
+
+                        this_b_project.bugs.remove(this_bug)
+                        this_b_project.save()
+
+                        new_bug_project = Project.objects.get(title = new_project)
+                        new_bug_project.bugs.add(this_bug)
+                        new_bug_project.save()
+
+                        this_bug.updated = updated_time
+                        this_bug.save()            
+
+                    new_status = request.POST['status_update']
+
+                    if (this_bug.status != new_status):
+                        history = History(bug = this_bug, old = this_bug.status, new = new_status, property = "Status Upated", changer = user)
+                        history.save()
+
+                        updated_time = history.date
+
+                        this_bug.status = new_status
+                        this_bug.updated = updated_time
+                        this_bug.save()
+
+                        if new_status == 'Additional Info Required':
+
+                            string = f'You have been asked to provide additional information on ticket: {this_bug.title} in Project: {new_project}'
+
+                            info_message = Message(title = 'Important', message = string)
+                            info_message.save()
+
+                            bug_submitter = this_bug.submitter
+
+                            bug_submitter.person.messages.add(info_message)
+                            bug_submitter.save()
+
+                    # new new
+
+                    new_developer_email = request.POST['ticket_developer_email']
+
+                    # if (this_bug.developer == None or this_bug.developer.username != new_developer):
+                    if (this_bug.developer == None or this_bug.developer.email != new_developer_email):
+
+                        # if new_developer == 'None':
+                        if (new_developer_email == 'None' or new_developer_email == ''):
+                            
+                            if this_bug.developer != None:
+                                
+                                this_bug.developer = None
+                                this_bug.save()
+
+                        # elif User.objects.filter(username = new_developer).exists():
+                        elif User.objects.filter(institution_user__name = institution.name, email = new_developer_email).exists():
+
+                            # this_dev = User.objects.get(username = new_developer)
+                            this_dev = User.objects.get(institution_user__name = institution.name, email = new_developer_email)
+
+                            new_bug_project = Project.objects.get(title = new_project)
+
+                            if this_dev in new_bug_project.developers.all():
+
+                                if this_bug.developer != None:
+
+                                    history = History(bug = this_bug, old = this_bug.developer.email, new = new_developer_email, property = "New Developer Assigned", changer = user)
+                                    history.save()
+
+                                    updated_time = history.date
+
+                                    this_bug.developer = this_dev
+                                    this_bug.updated = updated_time
+                                    this_bug.save()
+
+                                else:
+
+                                    history = History(bug = this_bug, old = 'None', new = new_developer_email, property = "New Developer Assigned", changer = user)
+                                    history.save()
+
+                                    updated_time = history.date
+
+                                    this_bug.developer = this_dev
+                                    this_bug.updated = updated_time
+                                    this_bug.save()
+
+                            else:
+
+                                string = f'The developer with the email: {new_developer_email}, is not an authorized developer of the Project you have specified, please try again'
+
+                                return render(request, "debugger/pm_view_tickets.html", {
+                                    'institution':institution, 'message': string, 'message_bug':this_bug, 'message_bug_dev':this_bug.developer, 'user':user, 'isUnread':isUnread, 'inProject':inProject, 'user_messages':user_messages, 'all_bugs':all_bugs, 'these_projects':these_projects
+                                })
+                                # new_message = Message(title = 'Error', message = string)
+                                # new_message.save()
+
+                                # user.person.messages.add(new_message)
+                                # user.save()
+
+                        else:
+
+                            string = f'The developer with the email: {new_developer_email} cannot be found, please try again'
+
+                            return render(request, "debugger/pm_view_tickets.html", {
+                                'institution':institution, 'message': string, 'message_bug':this_bug, 'message_bug_dev':this_bug.developer, 'user':user, 'isUnread':isUnread, 'inProject':inProject, 'user_messages':user_messages, 'all_bugs':all_bugs, 'these_projects':these_projects
+                            })
+
+                            # new_message = Message(title = 'Error', message = string)
+                            # new_message.save()
+
+                            # user.person.messages.add(new_message)
+                            # user.save()
+
+                user_messages = user.person.messages.all()
+
+                isUnread = False
+
+                for message in user_messages:
+                    if message.read == False:
+                        isUnread = True
+
+                return HttpResponseRedirect(request.path_info)
 
             return render(request, "debugger/pm_view_tickets.html", {
                 'institution':institution, 'user':user, 'isUnread':isUnread, 'inProject':inProject, 'user_messages':user_messages, 'all_bugs':all_bugs, 'these_projects':these_projects
