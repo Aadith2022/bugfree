@@ -143,8 +143,12 @@ def index(request):
 
             if Institution.objects.filter(name = institution).exists():
 
+                if User.objects.filter(username = username).exists():
+                    return render(request, "debugger/index.html", {
+                        "message": "This username has already been taken, please try again"
+                    })
                 #this filter will show that there is already someone in this institution using this email, so we wont allow them to reregister
-                if User.objects.filter(institution_user__name = institution, email = email).exists():
+                elif User.objects.filter(institution_user__name = institution, email = email).exists():
                     return render(request, "debugger/index.html", {
                         "message": "This email is already in use for this institution"
                     })
@@ -200,6 +204,10 @@ def index(request):
             if Institution.objects.filter(name = institution).exists():
                 return render (request, "debugger/index.html", {
                     "message": "Sorry, an Institution with this name already exists"
+                })
+            elif User.objects.filter(username = username).exists():
+                return render(request, "debugger/index.html", {
+                    "message": "This username is already in use, please try again"
                 })
 
 
@@ -1445,8 +1453,8 @@ def admin_manage_projects(request, institution_id, admin_id):
 
                     #new
 
-                    for project in all_projects:
-                        if project.title == title:
+                    for this_project in all_projects:
+                        if this_project.title == title:
                             return render(request, "debugger/admin_manage_projects.html", {
                                 'institution':institution, 'message': 'There already is a project with this title', 'admin':user, 'all_projects':all_projects, 'all_users':all_users, 'all_admin':all_admin, 'all_devs':all_devs, 'all_pm':all_pm, 'all_submitters':all_submitters, 'all_messages':all_messages, 'isUnread':isUnread, 'all_pending':all_pending
                             })
@@ -1662,7 +1670,9 @@ def admin_manage_tickets(request, institution_id, admin_id):
                         this_bug.updated = updated_time
                         this_bug.save()            
 
-                    new_project = request.POST['ticket_project']
+                    new_project_id = request.POST['ticket_project']
+
+                    new_project = Project.objects.get(pk = new_project_id)
 
                     bug_project = []
 
@@ -1671,20 +1681,19 @@ def admin_manage_tickets(request, institution_id, admin_id):
 
                     this_bug_project = bug_project[0]
 
-                    if (this_bug_project.title != new_project):
-                        history = History(bug = this_bug, old = this_bug_project.title, new = new_project, property = "Project Reassigned", changer = user)
+                    if (this_bug_project.title != new_project.title):
+                        history = History(bug = this_bug, old = this_bug_project.title, new = new_project.title, property = "Project Reassigned", changer = user)
                         history.save()
 
                         updated_time = history.date
 
-                        this_b_project = Project.objects.get(title = this_bug_project.title)
+                        this_b_project = Project.objects.get(pk = this_bug_project.id)
 
                         this_b_project.bugs.remove(this_bug)
                         this_b_project.save()
 
-                        new_bug_project = Project.objects.get(title = new_project)
-                        new_bug_project.bugs.add(this_bug)
-                        new_bug_project.save()
+                        new_project.bugs.add(this_bug)
+                        new_project.save()
 
                         this_bug.updated = updated_time
                         this_bug.save()            
@@ -1734,9 +1743,7 @@ def admin_manage_tickets(request, institution_id, admin_id):
                             # this_dev = User.objects.get(username = new_developer)
                             this_dev = User.objects.get(institution_user__name = institution.name, email = new_developer_email)
 
-                            new_bug_project = Project.objects.get(title = new_project)
-
-                            if this_dev in new_bug_project.developers.all():
+                            if this_dev in new_project.developers.all():
 
                                 if this_bug.developer != None:
 
@@ -2283,9 +2290,9 @@ def submitter_view_ticket(request, institution_id, user_id):
 
                 if 'ticket_submit' in request.POST:
 
-                    project_name = request.POST['ticket_project']
+                    project_id = request.POST['ticket_project']
 
-                    this_project = Project.objects.get(title = project_name)
+                    this_project = Project.objects.get(pk = project_id)
 
                     title = request.POST['ticket_title']
                     description = request.POST['ticket_description']
@@ -2293,10 +2300,21 @@ def submitter_view_ticket(request, institution_id, user_id):
                     priority = request.POST['ticket_priority']
                     status = request.POST['ticket_status']
 
-                    if Bug.objects.filter(title = title).exists():
-                        return render(request, "debugger/submitter_view_tickets.html", {
-                            'institution':institution, 'message': 'There already is a ticket with this title', 'user':user, 'all_messages':all_messages, 'isUnread':isUnread, 'inProject':inProject, 'all_bugs':all_bugs, 'these_projects':these_projects, 'change_bug':change_bug
-                        })
+                    inst_projects = institution.projects.all()
+
+                    every_bug = []
+
+                    for exact_project in inst_projects:
+                        for exact_project_bug in exact_project.bugs.all():
+                            every_bug.append(exact_project_bug)
+
+                    for exact_bug in every_bug:
+                        if exact_bug.title == title:
+                            return render(request, "debugger/submitter_view_tickets.html", {
+                                'institution':institution, 'message': 'There already is a ticket with this title', 'user':user, 'all_messages':all_messages, 'isUnread':isUnread, 'inProject':inProject, 'all_bugs':all_bugs, 'these_projects':these_projects, 'change_bug':change_bug
+                            })
+                        else:
+                            continue
 
                     new_bug = Bug(title = title, content = description, type = type, status = status, priority = priority, submitter = user)
                     new_bug.save()
@@ -2342,19 +2360,32 @@ def submitter_view_ticket(request, institution_id, user_id):
 
                     elif (this_bug.content == new_description):
 
-                        if Bug.objects.filter(title = new_title).exists():
+                        inst_projects = institution.projects.all()
 
-                            this_proj = []
+                        every_bug = []
 
-                            for project in this_bug.project_bugs.all():
-                                this_proj.append(project)
+                        for exact_project in inst_projects:
+                            for exact_project_bug in exact_project.bugs.all():
+                                every_bug.append(exact_project_bug)
 
-                            our_project = this_proj[0]
+                        for exact_bug in every_bug:
+                            if exact_bug.title == new_title:
 
-                            return render(request, "debugger/submitter_view_tickets.html", {
-                                'institution':institution, 'message': 'Please choose a different title', 'message_bug':this_bug, 'message_bug_project':our_project, 'user':user, 'all_messages':all_messages, 'isUnread':isUnread, 'inProject':inProject, 'all_bugs':all_bugs, 'these_projects':these_projects, 'change_bug':change_bug
-                            })
+                                this_proj = []
+
+                                for project in this_bug.project_bugs.all():
+                                    this_proj.append(project)
+
+                                our_project = this_proj[0]
+
+                                return render(request, "debugger/submitter_view_tickets.html", {
+                                    'institution':institution, 'message': 'Please choose a different title', 'message_bug':this_bug, 'message_bug_project':our_project, 'user':user, 'all_messages':all_messages, 'isUnread':isUnread, 'inProject':inProject, 'all_bugs':all_bugs, 'these_projects':these_projects, 'change_bug':change_bug
+                                })
+
+                            else:
+                                continue
                         
+
                         new_history = History(bug = this_bug, old = this_bug.title, new = new_title, property = 'Additional Info Added', changer = user)
                         new_history.save()
 
@@ -2367,18 +2398,30 @@ def submitter_view_ticket(request, institution_id, user_id):
 
                     else:
 
-                        if Bug.objects.filter(title = new_title).exists():
+                        inst_projects = institution.projects.all()
 
-                            this_proj = []
+                        every_bug = []
 
-                            for project in this_bug.project_bugs.all():
-                                this_proj.append(project)
+                        for exact_project in inst_projects:
+                            for exact_project_bug in exact_project.bugs.all():
+                                every_bug.append(exact_project_bug)
 
-                            our_project = this_proj[0]
-                            
-                            return render(request, "debugger/submitter_view_tickets.html", {
-                                'institution':institution, 'message': 'Please choose a different title', 'message_bug':this_bug, 'message_bug_project':our_project, 'user':user, 'all_messages':all_messages, 'isUnread':isUnread, 'inProject':inProject, 'all_bugs':all_bugs, 'these_projects':these_projects, 'change_bug':change_bug
-                            })
+                        for exact_bug in every_bug:
+                            if exact_bug.title == new_title:
+
+                                this_proj = []
+
+                                for project in this_bug.project_bugs.all():
+                                    this_proj.append(project)
+
+                                our_project = this_proj[0]
+                                
+                                return render(request, "debugger/submitter_view_tickets.html", {
+                                    'institution':institution, 'message': 'Please choose a different title', 'message_bug':this_bug, 'message_bug_project':our_project, 'user':user, 'all_messages':all_messages, 'isUnread':isUnread, 'inProject':inProject, 'all_bugs':all_bugs, 'these_projects':these_projects, 'change_bug':change_bug
+                                })
+
+                            else:
+                                continue
 
                         new_history = History(bug = this_bug, old = this_bug.content, new = new_description, property = 'Additional Info added', changer = user)
                         new_history.save()
@@ -2797,6 +2840,10 @@ def developer_view_tickets(request, institution_id, user_id):
 
                     new_status = request.POST['status_update']
 
+                    old_priority = this_ticket.priority
+
+                    new_priority = request.POST['ticket_priority_update']
+
                     if old_status != new_status:
 
                         this_bug_history = History(bug = this_ticket, old = old_status, new = new_status, property = 'Status Updated', changer = user)
@@ -2804,6 +2851,16 @@ def developer_view_tickets(request, institution_id, user_id):
                         update_time = this_bug_history.date
 
                         this_ticket.status = new_status
+                        this_ticket.updated = update_time
+                        this_ticket.save()
+
+                    if old_priority != new_priority:
+
+                        this_bug_history = History(bug = this_ticket, old = old_priority, new = new_priority, property = 'Priority Updated', changer = user)
+                        this_bug_history.save()
+                        update_time = this_bug_history.date
+
+                        this_ticket.priority = new_priority
                         this_ticket.updated = update_time
                         this_ticket.save()
 
@@ -3197,6 +3254,14 @@ def pm_view_tickets(request, institution_id, user_id):
                 for bug in project.bugs.all():
                     all_bugs.append(bug)
 
+            inst_projects = institution.projects.all()
+
+            every_bug = []
+
+            for exact_project in inst_projects:
+                for exact_project_bug in exact_project.bugs.all():
+                    every_bug.append(exact_project_bug)
+
             if request.method == "POST":
 
                 if 'ticket_submit' in request.POST:
@@ -3209,7 +3274,7 @@ def pm_view_tickets(request, institution_id, user_id):
 
                     if (this_bug.title != new_title):
 
-                        for bug in all_bugs:
+                        for bug in every_bug:
                             if bug.title == new_title:
                                 return render(request, "debugger/pm_view_tickets.html", {
                                     'institution':institution, 'message':'There already is a ticket with this title', 'message_bug':this_bug, 'message_bug_dev':this_bug.developer, 'user':user, 'isUnread':isUnread, 'inProject':inProject, 'user_messages':user_messages, 'all_bugs':all_bugs, 'these_projects':these_projects
@@ -3262,7 +3327,9 @@ def pm_view_tickets(request, institution_id, user_id):
                         this_bug.updated = updated_time
                         this_bug.save()            
 
-                    new_project = request.POST['ticket_project']
+                    new_project_id = request.POST['ticket_project']
+
+                    new_project = Project.objects.get(pk =  new_project_id)
 
                     bug_project = []
 
@@ -3271,20 +3338,19 @@ def pm_view_tickets(request, institution_id, user_id):
 
                     this_bug_project = bug_project[0]
 
-                    if (this_bug_project.title != new_project):
+                    if (this_bug_project.title != new_project.title):
                         history = History(bug = this_bug, old = this_bug_project.title, new = new_project, property = "Project Reassigned", changer = user)
                         history.save()
 
                         updated_time = history.date
 
-                        this_b_project = Project.objects.get(title = this_bug_project.title)
+                        this_b_project = Project.objects.get(pk = this_bug_project.id)
 
                         this_b_project.bugs.remove(this_bug)
                         this_b_project.save()
 
-                        new_bug_project = Project.objects.get(title = new_project)
-                        new_bug_project.bugs.add(this_bug)
-                        new_bug_project.save()
+                        new_project.bugs.add(this_bug)
+                        new_project.save()
 
                         this_bug.updated = updated_time
                         this_bug.save()            
@@ -3334,9 +3400,7 @@ def pm_view_tickets(request, institution_id, user_id):
                             # this_dev = User.objects.get(username = new_developer)
                             this_dev = User.objects.get(institution_user__name = institution.name, email = new_developer_email)
 
-                            new_bug_project = Project.objects.get(title = new_project)
-
-                            if this_dev in new_bug_project.developers.all():
+                            if this_dev in new_project.developers.all():
 
                                 if this_bug.developer != None:
 

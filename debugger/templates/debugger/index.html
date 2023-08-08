@@ -28,6 +28,16 @@
             <h2>Welcome to BugFree</h2><br>
             <!-- <p>BugFree is a free bug tracking sytem that blends user-friendliness and robust-functionality together, in seamless harmony. Due to the simple nature of Bugfree's design, within a matter of minutes after signing up, users can efficently manage their projects, and collaborate with their teammates, so they can deliver great projects on time. Sign up today to get started!</p> -->
             <p>BugFree is a free client-based bug tracking system which provides institutions with a clear and centralized overview of development requests that have been submitted by their clients. All requests made by clients can further be categorized based on priority, type (ranging from bugs, to improvements), and status, in order to help institutions have ease of access when managing their projects, and to provide highly organized client-feedback so institutions can better define their product road maps, and deliver their products on time. Sign up to get started today!</p>
+            <br>
+
+            <p id = "setup_description">Learn how to get setup from the video below</p><br>
+
+            <div class = "video_container">
+
+                <iframe width="450px" height="253px" src="https://www.youtube.com/embed/KI3C5lxBeLs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+            </div>
+
         </div>
 
     </div>
@@ -262,6 +272,17 @@
                 login_box = document.querySelector('.login-box');
                 login_box.style.display = 'block';
 
+            } else if ('{{message}}' == 'This username has already been taken, please try again') {
+               
+                wrapper = document.querySelector('.login_wrapper');
+                wrapper.style.display = 'flex';
+
+                wrapper.classList.add('active-pop');
+                wrapper.classList.add('active');
+
+                reg_box = document.querySelector('.registration-box');
+                reg_box.style.display = 'block';
+
             } else if ('{{message}}' == 'This email is already in use for this institution') {
 
                 wrapper = document.querySelector('.login_wrapper');
@@ -285,6 +306,17 @@
                 reg_box.style.display = 'block';
 
             } else if ('{{message}}' == 'Sorry, an Institution with this name already exists') {
+
+                wrapper = document.querySelector('.login_wrapper');
+                wrapper.style.display = 'flex';
+
+                wrapper.classList.add('active-pop');
+                wrapper.classList.add('institute');
+
+                in_box = document.querySelector('.institution-reg-box');
+                in_box.style.display = 'block';
+
+            } else if ('{{message}}' == 'This username is already in use, please try again') {
 
                 wrapper = document.querySelector('.login_wrapper');
                 wrapper.style.display = 'flex';

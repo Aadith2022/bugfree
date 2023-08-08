@@ -47,7 +47,7 @@
                                     <td>{{ bug.status }}</td>
                                     <td>{{ bug.type }}</td>
                                     <td>{{ bug.created }}</td>
-                                    <td class = "update_bug"><button class = "update_bug_button" onclick = "showupdate('{{bug.title}}', '{{bug.content}}', '{{bug.type}}', '{{bug.priority}}', '{{bug.id}}')">Update</button></td>
+                                    <td class = "update_bug"><button class = "update_bug_button" onclick = "showupdate('{{bug.title}}', '{{bug.content}}', '{{bug.type}}', '{{bug.id}}')">Update</button></td>
                                     <td class = "detail_table_element"><a href = "{% url 'developer_ticket_details' institution_id=institution.id user_id=user.id ticket_id=bug.id %}">More Details</a></td>
                                 </tr>
                             {% endfor %}
@@ -84,10 +84,15 @@
                 <h5 class = "hidden_ticket_description"></h5><br><br>
                 <h3>Ticket Type:</h3><br>
                 <h5 class = "hidden_ticket_type"></h5><br><br>
-                <h3>Ticket Priority:</h3><br>
-                <h5 class = "hidden_ticket_priority"></h5><br><br>
 
-                <label for = "status_update">Update Ticket Priority:</label><br><br>
+                <label for = "ticket_priority_update">Update Ticket Priority:</label><br><br>
+                <select name = "ticket_priority_update" size = "3">
+                    <option value = "Low">Low</option>
+                    <option value = "Medium">Medium</option>
+                    <option value = "High">High</option>
+                </select><br><br>
+
+                <label for = "status_update">Update Ticket Status:</label><br><br>
                 <select name = "status_update" size = "5">
                     <option value = "New" >New</option>
                     <option value = "Open" >Open</option>
@@ -98,7 +103,7 @@
 
                 <input type = "hidden" name = "hidden_ticket_id" class = "hidden_ticket_id">
 
-                <button type = "submit" class = "pruser_btn" name = "update_ticket_status">Update Status</button>
+                <button type = "submit" class = "pruser_btn" name = "update_ticket_status">Update Ticket</button>
                 <button class = "pruser_btn" name = "update_ticket_cancel" onclick = "cancelupdate()">Cancel</button>
             </form>
 
@@ -108,14 +113,13 @@
 
     <script>
 
-        function showupdate(title, content, type, priority, id) {
+        function showupdate(title, content, type, id) {
             document.querySelector('.developer_view_tickets').style.display = 'none';
             document.querySelector('.developer_edit_ticket').style.display = 'block';
 
             document.querySelector('.hidden_ticket_title').innerHTML = `${title}`;
             document.querySelector('.hidden_ticket_description').innerHTML = `${content}`;
             document.querySelector('.hidden_ticket_type').innerHTML = `${type}`;
-            document.querySelector('.hidden_ticket_priority').innerHTML = `${priority}`;
 
             document.querySelector('.hidden_ticket_id').value = `${id}`;
         }

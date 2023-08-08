@@ -120,7 +120,7 @@
                 <label for = "ticket_project">Project:</label><br><br>
                 <select name = "ticket_project" id = "ticket_project" placeholder = "Select a Project" size = "4">
                     {% for project in these_projects %}
-                        <option value = "{{project.title}}">{{project.title}}</option>
+                        <option value = "{{project.id}}">{{project.title}}</option>
                     {% endfor %}
                 </select>
 
