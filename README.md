@@ -48,4 +48,12 @@ The user that is registering the new Institution will automatically be added to 
 ![image](https://github.com/Aadith2022/bugfree/assets/113648765/94f20b91-1347-403c-89f9-31ddb851c5c0)
 
 
+## Registration
 
+After registering to join an Institution, a user will be presented with the following page, instructing them to wait until their request to join the Institution has been accepted by an administrator
+
+![image](https://github.com/Aadith2022/bugfree/assets/113648765/6c8ab271-1935-4d24-8641-2bc43482afe9)
+
+This is what it looks like for the Admin when a user submits a join request to the Institution. The admin have the option to either accept or deny each request.
+
+![image](https://github.com/Aadith2022/bugfree/assets/113648765/cfce1fbd-1e85-4e6b-b1c7-4d6ee908c1ee)
