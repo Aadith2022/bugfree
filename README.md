@@ -57,3 +57,34 @@ After registering to join an Institution, a user will be presented with the foll
 This is what it looks like for the Admin when a user submits a join request to the Institution. The admin have the option to either accept or deny each request.
 
 ![image](https://github.com/Aadith2022/bugfree/assets/113648765/cfce1fbd-1e85-4e6b-b1c7-4d6ee908c1ee)
+
+## Manage Users Section
+
+Once the Admin has accepted some join request, the 'Manage Users' section will show a table of all of the users, excluding other admin, in the Institution. As the admin, a user has the ability to edit the roles of other users, or remove others from the Institution entirely
+
+![image](https://github.com/Aadith2022/bugfree/assets/113648765/e4beadf1-9850-48fe-a503-af0745153298)
+
+## View Projects Section
+
+When an Institution does not have any projects created yet, the 'View Projects' page will instruct you to create a new project to get started
+
+Both the Project Manager and Admin have the ability to create new projects, where they can include a title, description, as well as a list of other users that they would like to include in the project
+
+![image](https://github.com/Aadith2022/bugfree/assets/113648765/2e0c64f8-28d5-4f88-a70d-b3d9faa75cfd)
+
+Once an Institution has some projects, the 'View Projects' section will be updated with additional information
+
+* For Admin, this page will display all of the projects for the Institution
+* For Project Managers, they will only be able to view projects that they have been assigned to
+* This page is not available to view for Submitters and Developers
+
+![image](https://github.com/Aadith2022/bugfree/assets/113648765/e7058fb6-6753-4cae-8f62-db66c8a609b6)
+
+
+## View Tickets Section
+
+If there are no tickets for an Institution, this page will instruct users to wait until a Submitter has submitted new tickets
+
+For a Submitter, this page will display all of the tickets that they have created, if there are none, they will be instructed to create new tickets
+
+
