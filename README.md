@@ -101,7 +101,7 @@ In this section, Admin and Project Managers can see all of the information assoc
 
 If there are no tickets for an Institution, this page will instruct users to wait until a Submitter has submitted new tickets
 
-For a Submitter, this page will display all of the tickets that they have created, if there are none, they will be instructed to a new ticket
+For a Submitter, this page will display all of the tickets that they have created, if there are none, they will be instructed to create a new ticket
 
 When creating a ticket, a submitter can include the following information: title, description, type, priority (which can be either Low, Medium, or High), as well the project that they want this project to be associated with. Whenever a ticket is created, its default status is 'New', this can be changed by the Developer, which will be discussed later
 
