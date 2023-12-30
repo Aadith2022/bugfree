@@ -173,3 +173,7 @@ Once tickets have been created, the 'Dashboard Home' section will also be update
 
 ![image](https://github.com/Aadith2022/bugfree/assets/113648765/f444e267-e9b1-47d0-8a74-a9e7f3af263f)
 
+
+## Backend Architecture with Django and SQLite Database
+
+![image](https://github.com/Aadith2022/bugfree/assets/113648765/d809487d-2161-4421-97f6-a0fcc12916bd)
