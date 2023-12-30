@@ -5,16 +5,16 @@ Hello, welcome to BugFree. This is a client based Bug Tracking Website where cli
 This website features 4 main roles: Admin, Project Manager, Developer, and Submitter
 
 * Admin:
-
+  * Have the ability to add/remove users from the Institution or from specific projects, create projects, changes roles of all users, assign developers to tickets, and edit information information for all tickets, 
 
 * Project Manager:
-
+  * Have the ability to change the roles of user's within the projects that they are the managers of, add/remove users from those projects, assign developers to tickets, as well as edit ticket information associated with their project
 
 * Developer:
-
+  * Have the ability to update the priority and status of tickets they are assigned to
 
 * Submitter:
-
+  * Have the ability to create to create tickets for projects they are assigned to by an Admin or Project Manager
 
 ## Load Page:
 
