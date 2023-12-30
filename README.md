@@ -24,7 +24,7 @@ This is how the website looks upon loading, it has links for Home and Login
 
 ## Home Page:
 
-Upon Clicking the Home Link, you will see a small description of the Website in addition to a video tutorial to help nw users navigate the site
+Upon Clicking the Home Link, you will see a small description of the Website in addition to a video tutorial to help new users navigate the site
 
 ![image](https://github.com/Aadith2022/bugfree/assets/113648765/fb9cfebd-b89b-4a83-b668-3b69c22afa61)
 
