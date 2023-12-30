@@ -119,7 +119,7 @@ After tickets have been created, the 'View Tickets' section will display additio
 
 ## Update Tickets
 
-Admins, Project Managers, and Developers have the ability to update tickets. Admins and Project Managers ahve the ability can update every aspect of a ticket, weheras developers can only update the status and priority of tickets. The Admin, Project Managers, and Developers all have the power to change the status of a ticket to one of the following: New, Open, In Progress, Resolved, and Additional Information Required
+Admins, Project Managers, and Developers have the ability to update tickets. Admins and Project Managers have the ability can update every aspect of a ticket, weheras developers can only update the status and priority of tickets. The Admin, Project Managers, and Developers all have the power to change the status of a ticket to one of the following: New, Open, In Progress, Resolved, and Additional Information Required
 
 By default, when Tickets are created they do not have a devloper assigned to them, so it is up to either the Admin or the Project Manager to assign a deveoper to a given ticket
 
